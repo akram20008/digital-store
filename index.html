@@ -52,6 +52,13 @@ if(!localStorage.getItem("currentUser")){
 <footer>
   <p>© 2026 متجر الخدمات الرقمية</p>
 </footer>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="auth.js"></script>
 
+<script>
+  protect();
+</script>
+  <button onclick="logout()">تسجيل خروج</button>
 </body>
   </html>
