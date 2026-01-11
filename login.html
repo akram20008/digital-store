@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تسجيل الدخول</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.auth-box{
+  max-width:350px;
+  margin:80px auto;
+  background:white;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+.auth-box h2{text-align:center}
+.auth-box input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+</style>
+</head>
+<body>
+
+<div class="auth-box">
+  <h2>تسجيل الدخول</h2>
+  <input id="email" placeholder="البريد الإلكتروني">
+  <input id="password" type="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+
+  <p style="text-align:center">
+    ما عندك حساب؟
+    <a href="register.html">إنشاء حساب</a>
+  </p>
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>
