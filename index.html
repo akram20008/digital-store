@@ -3,60 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>متجر الخدمات الرقمية</title>
-  <style>
-    body{
-      font-family:Tahoma;
-      background:#f1f5f9;
-      margin:0;
-      padding:0;
-    }
-    header{
-      background:#2563eb;
-      color:white;
-      padding:15px;
-      text-align:center;
-    }
-    .container{
-      padding:20px;
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:15px;
-    }
-    .card{
-      background:white;
-      padding:15px;
-      border-radius:12px;
-      box-shadow:0 10px 20px rgba(0,0,0,.1);
-    }
-    button{
-      background:#16a34a;
-      color:white;
-      border:none;
-      padding:10px;
-      width:100%;
-      border-radius:8px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h2>🛒 متجر الخدمات الرقمية</h2>
+<header class="top">
+  <h1>🛒 متجر الخدمات الرقمية</h1>
+  <nav>
+    <a href="#">الرئيسية</a>
+    <a href="#">تسجيل دخول</a>
+  </nav>
 </header>
 
-<div class="container">
+<section class="hero">
+  <h2>أفضل الخدمات الرقمية بجودة عالية</h2>
+  <p>تصميم – برمجة – تسويق – إدارة</p>
+</section>
+
+<section class="services">
   <div class="card">
-    <h3>تصميم شعار</h3>
-    <p>السعر: 10$</p>
-    <button>طلب الخدمة</button>
+    <h3>تصميم موقع</h3>
+    <p>موقع احترافي متجاوب</p>
+    <span>50$</span>
+    <button>اطلب الآن</button>
   </div>
 
   <div class="card">
-    <h3>إنشاء موقع</h3>
-    <p>السعر: 50$</p>
-    <button>طلب الخدمة</button>
+    <h3>إدارة صفحات</h3>
+    <p>إدارة كاملة للسوشيال ميديا</p>
+    <span>30$</span>
+    <button>اطلب الآن</button>
   </div>
-</div>
+
+  <div class="card">
+    <h3>برمجة تطبيق</h3>
+    <p>Android / Web</p>
+    <span>100$</span>
+    <button>اطلب الآن</button>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 متجر الخدمات الرقمية</p>
+</footer>
 
 </body>
   </html>
