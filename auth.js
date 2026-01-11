@@ -1,49 +1,54 @@
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users")) || [];
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCE0YBzwzgyleVzv0lu6rUMe0WX6geUk2M",
+  authDomain: "digital-store-f1ff7.firebaseapp.com",
+  projectId: "digital-store-f1ff7",
+  storageBucket: "digital-store-f1ff7.appspot.com",
+  messagingSenderId: "538006229610",
+  appId: "1:538006229610:web:0c32ebe8d787ea71d6f013"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// ===== تسجيل الدخول =====
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      window.location.href = "index.html";
+    })
+    .catch(err => alert(err.message));
 }
 
-function saveUsers(users){
-  localStorage.setItem("users", JSON.stringify(users));
+// ===== إنشاء حساب =====
+function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("تم إنشاء الحساب بنجاح");
+      window.location.href = "login.html";
+    })
+    .catch(err => alert(err.message));
 }
 
-/* ===== إنشاء حساب ===== */
-function register(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if(!email || !password){
-    alert("املأ جميع الحقول");
-    return;
-  }
-
-  const users = getUsers();
-  if(users.find(u => u.email === email)){
-    alert("البريد مستخدم مسبقًا");
-    return;
-  }
-
-  users.push({email,password});
-  saveUsers(users);
-
-  alert("✅ تم إنشاء الحساب");
-  location.href = "login.html";
-}
-
-/* ===== تسجيل دخول ===== */
-function login(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  const users = getUsers();
-  const found = users.find(
-    u => u.email === email && u.password === password
-  );
-
-  if(!found){
-    alert("بيانات غير صحيحة");
-    return;
-  }
-
-  localStorage.setItem("currentUser", email);
-  location.href = "index.html";
+// ===== حماية الصفحات =====
+function protect() {
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
     }
+  });
+}
+
+// ===== تسجيل خروج =====
+function logout() {
+  auth.signOut().then(() => {
+    window.location.href = "login.html";
+  });
+}
