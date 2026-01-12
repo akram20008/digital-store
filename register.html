@@ -1,58 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>إنشاء حساب</title>
-
-<style>
-body{
-  font-family:Tahome;
-  background:#f1f5f9;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-.box{
-  background:white;
-  padding:25px;
-  width:320px;
-  border-radius:12px;
-}
-input,button{
-  width:100%;
-  padding:10px;
-  margin-bottom:12px;
-}
-button{
-  background:#2563eb;
-  color:white;
-  border:none;
-}
-a{
-  display:block;
-  text-align:center;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="box">
-  <h2 style="text-align:center">إنشاء حساب</h2>
+<div class="card">
+  <h2>✨ إنشاء حساب</h2>
 
-  <!-- ❗ بدون form -->
   <input id="email" type="email" placeholder="البريد الإلكتروني">
   <input id="password" type="password" placeholder="كلمة المرور">
 
   <button onclick="register()">إنشاء حساب</button>
 
-  <a href="login.html">لديك حساب؟ تسجيل الدخول</a>
+  <p><a href="login.html">لديك حساب؟ تسجيل الدخول</a></p>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="auth.js"></script>
-
 </body>
 </html>
