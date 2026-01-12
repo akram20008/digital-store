@@ -130,22 +130,29 @@ function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
-// ===== تحميل الخدمات (مستقر) =====
-db.collection("services")
-.onSnapshot(snapshot=>{
-  services.innerHTML="";
-  snapshot.forEach(doc=>{
-    const s = doc.data();
-    services.innerHTML += `
-      <div class="card">
-        <h3>${s.name}</h3>
-        <p>${s.desc || ""}</p>
-        <div class="price">${s.price} $</div>
-        <button onclick="orderService('${s.name}')">
-          اطلب الخدمة
-        </button>
-      </div>
-    `;
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+
+  // تحميل الخدمات بعد التأكد من تسجيل الدخول
+  db.collection("services")
+  .onSnapshot(snapshot=>{
+    services.innerHTML="";
+    snapshot.forEach(doc=>{
+      const s = doc.data();
+      services.innerHTML += `
+        <div class="card">
+          <h3>${s.name}</h3>
+          <p>${s.desc || ""}</p>
+          <div class="price">${s.price} $</div>
+          <button onclick="orderService('${s.name}')">
+            اطلب الخدمة
+          </button>
+        </div>
+      `;
+    });
   });
 });
 
