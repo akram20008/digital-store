@@ -16,6 +16,11 @@ body{
   margin:auto;
   padding:20px;
 }
+.top-actions{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
 .box{
   background:#fff;
   color:#000;
@@ -43,6 +48,9 @@ button{
 .logout{
   background:#dc2626;
 }
+.go-store{
+  background:#16a34a;
+}
 </style>
 </head>
 
@@ -50,7 +58,15 @@ button{
 
 <div class="container">
 <h1>لوحة تحكم الأدمن 🔐</h1>
-<button class="logout" onclick="logout()">تسجيل خروج</button>
+
+<div class="top-actions">
+  <button class="go-store" onclick="location.href='index.html'">
+    🛒 الذهاب للمتجر
+  </button>
+  <button class="logout" onclick="logout()">
+    تسجيل خروج
+  </button>
+</div>
 
 <!-- إضافة خدمة -->
 <div class="box">
@@ -80,7 +96,6 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-// ===== Firebase Config =====
 firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
@@ -90,13 +105,12 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== إيميلات الأدمن =====
 const ADMINS = [
   "admin@admin.com",
   "admin2@admin.com"
 ];
 
-// ===== حماية الصفحة =====
+// حماية الصفحة (بس تمنع غير الأدمن)
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -107,14 +121,10 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// ===== تسجيل خروج =====
 function logout(){
-  auth.signOut().then(()=>{
-    location.href="login.html";
-  });
+  auth.signOut().then(()=>location.href="login.html");
 }
 
-// ===== إضافة خدمة =====
 function addService(){
   const name = serviceName.value.trim();
   const desc = serviceDesc.value.trim();
@@ -137,9 +147,7 @@ function addService(){
   servicePrice.value="";
 }
 
-// ===== تحميل الخدمات =====
 db.collection("services")
-.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   services.innerHTML="";
   snapshot.forEach(doc=>{
@@ -154,9 +162,7 @@ db.collection("services")
   });
 });
 
-// ===== تحميل الطلبات =====
 db.collection("orders")
-.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   orders.innerHTML="";
   snapshot.forEach(doc=>{
@@ -175,11 +181,8 @@ db.collection("orders")
   });
 });
 
-// ===== تحديث حالة الطلب =====
-function updateStatus(orderId, status){
-  db.collection("orders").doc(orderId).update({
-    status: status
-  });
+function updateStatus(id,status){
+  db.collection("orders").doc(id).update({status});
 }
 </script>
 
