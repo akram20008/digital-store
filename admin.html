@@ -2,167 +2,167 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة تحكم الأدمن</title>
+<title>لوحة الأدمن</title>
 
 <style>
 body{
-  font-family:Tahoma;
-  background:#f1f5f9;
   margin:0;
+  font-family:Tahoma;
+  background:#0f172a;
+  color:#fff;
+}
+.container{
+  max-width:900px;
+  margin:auto;
   padding:20px;
 }
-h1{text-align:center}
-
 .box{
-  background:white;
-  padding:15px;
+  background:#fff;
+  color:#000;
+  padding:20px;
   border-radius:12px;
   margin-bottom:20px;
 }
-
-input,button{
+h2{margin-top:0}
+input,textarea,button{
   width:100%;
   padding:10px;
-  margin:6px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
+  margin-bottom:10px;
 }
-
 button{
-  background:#2563eb;
+  background:#1e40af;
+  color:#fff;
   border:none;
-  color:white;
-  cursor:pointer;
+  border-radius:6px;
 }
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
+.service, .order{
+  border-bottom:1px solid #ddd;
+  padding:10px 0;
 }
-
-th,td{
-  border:1px solid #ccc;
-  padding:8px;
-  text-align:center;
+.logout{
+  background:#dc2626;
 }
 </style>
 </head>
 
 <body>
 
-<h1>لوحة تحكم الأدمن</h1>
-<button onclick="logout()">تسجيل خروج</button>
+<div class="container">
+
+<h1>لوحة تحكم الأدمن 🔐</h1>
+<button class="logout" onclick="logout()">تسجيل خروج</button>
 
 <!-- إضافة خدمة -->
 <div class="box">
-  <h3>➕ إضافة خدمة</h3>
-  <input id="serviceName" placeholder="اسم الخدمة">
-  <input id="price" type="number" placeholder="سعر الخدمة">
-  <button onclick="addService()">إضافة</button>
+<h2>➕ إضافة خدمة</h2>
+<input id="serviceName" placeholder="اسم الخدمة">
+<textarea id="serviceDesc" placeholder="وصف الخدمة"></textarea>
+<input id="servicePrice" type="number" placeholder="السعر">
+<button onclick="addService()">إضافة الخدمة</button>
 </div>
 
-<!-- الخدمات -->
+<!-- عرض الخدمات -->
 <div class="box">
-  <h3>📋 الخدمات</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>اسم الخدمة</th>
-        <th>السعر</th>
-        <th>حذف</th>
-      </tr>
-    </thead>
-    <tbody id="servicesTable"></tbody>
-  </table>
+<h2>🛒 الخدمات</h2>
+<div id="services"></div>
+</div>
+
+<!-- عرض الطلبات -->
+<div class="box">
+<h2>📦 الطلبات</h2>
+<div id="orders"></div>
+</div>
+
 </div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===== Firebase Config ===== */
-firebase.initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
   projectId: "digital-store-268a9",
-  storageBucket: "digital-store-268a9.firebasestorage.app",
-  messagingSenderId: "302075016274",
-  appId: "1:302075016274:web:4c2a5e40a6de69d87c9b8b"
-});
+};
+firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
+const db = firebase.firestore();
 
-/* ===== إيميلات الأدمن (2) ===== */
-const ADMINS = [
-  "admin@admin.com",
-  "admin2@admin.com"
-];
+const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-/* ===== حماية صفحة الأدمن ===== */
+// حماية الأدمن
 auth.onAuthStateChanged(user=>{
   if(!user || !ADMINS.includes(user.email)){
-    location.href = "login.html";
+    location.href="login.html";
   }
 });
 
-/* ===== تسجيل خروج ===== */
+// تسجيل خروج
 function logout(){
-  auth.signOut().then(()=>{
-    location.href="login.html";
-  });
+  auth.signOut().then(()=>location.href="login.html");
 }
 
-/* ===== الخدمات (localStorage) ===== */
-function getServices(){
-  return JSON.parse(localStorage.getItem("services")) || [];
-}
-
-function saveServices(s){
-  localStorage.setItem("services", JSON.stringify(s));
-}
-
+// إضافة خدمة
 function addService(){
-  const name = serviceName.value.trim();
-  const price = price.value.trim();
+  const name = serviceName.value;
+  const desc = serviceDesc.value;
+  const price = servicePrice.value;
 
-  if(!name || !price){
-    alert("أدخل اسم وسعر الخدمة");
-    return;
-  }
+  if(!name || !price) return alert("أدخل البيانات كاملة");
 
-  const services = getServices();
-  services.push({name,price});
-  saveServices(services);
-
-  serviceName.value="";
-  price.value="";
-  renderServices();
-}
-
-function deleteService(i){
-  const services = getServices();
-  services.splice(i,1);
-  saveServices(services);
-  renderServices();
-}
-
-function renderServices(){
-  servicesTable.innerHTML="";
-  getServices().forEach((s,i)=>{
-    servicesTable.innerHTML += `
-      <tr>
-        <td>${s.name}</td>
-        <td>${s.price}$</td>
-        <td><button onclick="deleteService(${i})">حذف</button></td>
-      </tr>
-    `;
+  db.collection("services").add({
+    name, desc, price,
+    createdAt: new Date()
+  }).then(()=>{
+    serviceName.value="";
+    serviceDesc.value="";
+    servicePrice.value="";
+    loadServices();
   });
 }
 
-renderServices();
+// تحميل الخدمات
+function loadServices(){
+  db.collection("services").orderBy("createdAt","desc")
+  .onSnapshot(snapshot=>{
+    services.innerHTML="";
+    snapshot.forEach(doc=>{
+      const s = doc.data();
+      services.innerHTML += `
+        <div class="service">
+          <b>${s.name}</b><br>
+          ${s.desc}<br>
+          💰 ${s.price}
+        </div>
+      `;
+    });
+  });
+}
+
+// تحميل الطلبات
+function loadOrders(){
+  db.collection("orders").orderBy("createdAt","desc")
+  .onSnapshot(snapshot=>{
+    orders.innerHTML="";
+    snapshot.forEach(doc=>{
+      const o = doc.data();
+      orders.innerHTML += `
+        <div class="order">
+          <b>الخدمة:</b> ${o.service}<br>
+          <b>الإيميل:</b> ${o.email}<br>
+          <b>الحالة:</b> ${o.status}
+        </div>
+      `;
+    });
+  });
+}
+
+loadServices();
+loadOrders();
 </script>
 
 </body>
-      </html>
+  </html>
