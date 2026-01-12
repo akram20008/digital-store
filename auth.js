@@ -1,11 +1,10 @@
-// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyCE0YBzwzgyleVzv0lu6rUMe0WX6geUk2M",
-  authDomain: "digital-store-f1ff7.firebaseapp.com",
-  projectId: "digital-store-f1ff7",
-  storageBucket: "digital-store-f1ff7.appspot.com",
-  messagingSenderId: "538006229610",
-  appId: "1:538006229610:web:0c32ebe8d787ea71d6f013"
+  apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain: "digital-store-268a9.firebaseapp.com",
+  projectId: "digital-store-268a9",
+  storageBucket: "digital-store-268a9.firebasestorage.app",
+  messagingSenderId: "302075016274",
+  appId: "1:302075016274:web:4c2a5e40a6de69d87c9b8b"
 };
 
 // Initialize Firebase
