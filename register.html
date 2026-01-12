@@ -1,87 +1,132 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>إنشاء حساب</title>
-<style>
-body{
-  background:#0f172a;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Tahoma;
-}
-.box{
-  background:#fff;
-  width:330px;
-  padding:25px;
-  border-radius:14px;
-}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-bottom:12px;
-}
-button{
-  background:#16a34a;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-}
-  .auth-footer {
-  margin-top: 15px;
-  text-align: center;
-  width: 100%;
-}
+  <meta charset="UTF-8">
+  <title>إنشاء حساب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.auth-footer a {
-  color: #6a1b9a;
-  font-weight: bold;
-  text-decoration: none;
-}
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
-.auth-footer a:hover {
-  text-decoration: underline;
-  }
-</style>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      direction: rtl;
+    }
+
+    .card {
+      background: #fff;
+      width: 90%;
+      max-width: 360px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+    }
+
+    .card input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .card button {
+      width: 100%;
+      padding: 12px;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .card button:hover {
+      background: #15803d;
+    }
+
+    .footer {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: #6a1b9a;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
 
-<div class="box">
-<h2 style="text-align:center">إنشاء حساب</h2>
-<input id="email" type="email" placeholder="البريد الإلكتروني">
-<input id="password" type="password" placeholder="كلمة السر">
-<button onclick="register()">إنشاء</button>
-</div>
+  <div class="card">
+    <h2>إنشاء حساب</h2>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script>
-firebase.initializeApp({
-  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
-  authDomain:"digital-store-268a9.firebaseapp.com",
-  projectId:"digital-store-268a9"
-});
-const auth=firebase.auth();
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة السر">
+    <input type="password" id="confirmPassword" placeholder="تأكيد كلمة السر">
 
-function register(){
-  auth.createUserWithEmailAndPassword(email.value,password.value)
-  .then(()=>{
-    alert("تم إنشاء الحساب ✅");
-    location.href="login.html";
-  })
-  .catch(e=>alert(e.message));
-}
-</script>
+    <button onclick="register()">إنشاء</button>
 
-  <button onclick="register()" class="btn">إنشاء</button>
+    <div class="footer">
+      هل عندك حساب؟
+      <a href="login.html">تسجيل الدخول</a>
+    </div>
+  </div>
 
-<p style="margin-top:15px; text-align:center;">
-  هل عندك حساب؟
-  <a href="login.html" style="color:#1e88e5; font-weight:bold;">
-    تسجيل الدخول
-  </a>
-</p>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+      authDomain: "digital-store-268a9.firebaseapp.com",
+      projectId: "digital-store-268a9",
+      storageBucket: "digital-store-268a9.firebasestorage.app",
+      messagingSenderId: "302075016274",
+      appId: "1:302075016274:web:4c2a5e40a6de69d87c9b8b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function register() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        alert("كلمتا السر غير متطابقتين");
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          alert("تم إنشاء الحساب بنجاح");
+          window.location.href = "login.html";
+        })
+        .catch(err => alert(err.message));
+    }
+  </script>
+
 </body>
 </html>
