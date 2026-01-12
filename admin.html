@@ -48,11 +48,9 @@ button{
 <body>
 
 <div class="container">
-
 <h1>لوحة تحكم الأدمن 🔐</h1>
 <button class="logout" onclick="logout()">تسجيل خروج</button>
 
-<!-- إضافة خدمة -->
 <div class="box">
 <h2>➕ إضافة خدمة</h2>
 <input id="serviceName" placeholder="اسم الخدمة">
@@ -61,18 +59,15 @@ button{
 <button onclick="addService()">إضافة الخدمة</button>
 </div>
 
-<!-- عرض الخدمات -->
 <div class="box">
 <h2>🛒 الخدمات</h2>
 <div id="services"></div>
 </div>
 
-<!-- عرض الطلبات -->
 <div class="box">
 <h2>📦 الطلبات</h2>
 <div id="orders"></div>
 </div>
-
 </div>
 
 <!-- Firebase -->
@@ -81,87 +76,96 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
+// ===== Firebase Config =====
 const firebaseConfig = {
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
   projectId: "digital-store-268a9",
 };
+
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const ADMINS = ["admin@admin.com","admin2@admin.com"];
+// ===== إيميلات الأدمن =====
+const ADMINS = [
+  "admin@admin.com",
+  "admin2@admin.com"
+];
 
-// حماية الأدمن
+// ===== حماية الأدمن =====
 auth.onAuthStateChanged(user=>{
-  if(!user || !ADMINS.includes(user.email)){
+  if(!user){
     location.href="login.html";
+    return;
+  }
+  if(!ADMINS.includes(user.email)){
+    location.href="index.html";
   }
 });
 
-// تسجيل خروج
+// ===== تسجيل خروج =====
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
-// إضافة خدمة
+// ===== إضافة خدمة =====
 function addService(){
-  const name = serviceName.value;
-  const desc = serviceDesc.value;
-  const price = servicePrice.value;
+  const name = serviceName.value.trim();
+  const desc = serviceDesc.value.trim();
+  const price = servicePrice.value.trim();
 
-  if(!name || !price) return alert("أدخل البيانات كاملة");
+  if(!name || !price){
+    alert("أدخل البيانات كاملة");
+    return;
+  }
 
   db.collection("services").add({
-    name, desc, price,
-    createdAt: new Date()
-  }).then(()=>{
-    serviceName.value="";
-    serviceDesc.value="";
-    servicePrice.value="";
-    loadServices();
+    name,
+    desc,
+    price,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
+
+  serviceName.value="";
+  serviceDesc.value="";
+  servicePrice.value="";
 }
 
-// تحميل الخدمات
-function loadServices(){
-  db.collection("services").orderBy("createdAt","desc")
-  .onSnapshot(snapshot=>{
-    services.innerHTML="";
-    snapshot.forEach(doc=>{
-      const s = doc.data();
-      services.innerHTML += `
-        <div class="service">
-          <b>${s.name}</b><br>
-          ${s.desc}<br>
-          💰 ${s.price}
-        </div>
-      `;
-    });
+// ===== تحميل الخدمات =====
+db.collection("services")
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
+  services.innerHTML="";
+  snapshot.forEach(doc=>{
+    const s = doc.data();
+    services.innerHTML += `
+      <div class="service">
+        <b>${s.name}</b><br>
+        ${s.desc || ""}<br>
+        💰 ${s.price}
+      </div>
+    `;
   });
-}
+});
 
-// تحميل الطلبات
-function loadOrders(){
-  db.collection("orders").orderBy("createdAt","desc")
-  .onSnapshot(snapshot=>{
-    orders.innerHTML="";
-    snapshot.forEach(doc=>{
-      const o = doc.data();
-      orders.innerHTML += `
-        <div class="order">
-          <b>الخدمة:</b> ${o.service}<br>
-          <b>الإيميل:</b> ${o.email}<br>
-          <b>الحالة:</b> ${o.status}
-        </div>
-      `;
-    });
+// ===== تحميل الطلبات =====
+db.collection("orders")
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
+  orders.innerHTML="";
+  snapshot.forEach(doc=>{
+    const o = doc.data();
+    orders.innerHTML += `
+      <div class="order">
+        <b>الخدمة:</b> ${o.service}<br>
+        <b>الإيميل:</b> ${o.email}<br>
+        <b>الحالة:</b> ${o.status || "جديد"}
+      </div>
+    `;
   });
-}
-
-loadServices();
-loadOrders();
+});
 </script>
 
 </body>
