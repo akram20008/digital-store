@@ -11,8 +11,6 @@ body{
   background:linear-gradient(135deg,#0f172a,#1e3a8a);
   color:#fff;
 }
-
-/* ===== Header ===== */
 header{
   background:#020617;
   padding:15px 20px;
@@ -39,20 +37,16 @@ header button{
   border-radius:6px;
   cursor:pointer;
 }
-
-/* ===== Content ===== */
 .container{
   max-width:1100px;
   margin:auto;
   padding:30px 20px;
 }
-
 .services{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:20px;
 }
-
 .card{
   background:#fff;
   color:#000;
@@ -86,8 +80,7 @@ header button{
 
 <header>
   <h2>🛒 متجر الخدمات الرقمية</h2>
-
-  <div class="header-actions">
+  <div class="header-actions" id="headerActions">
     <a href="orders.html">📦 طلباتي</a>
     <button onclick="logout()">تسجيل خروج</button>
   </div>
@@ -114,21 +107,34 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ===== حماية الصفحة ===== */
+/* ===== إيميلات الأدمن ===== */
+const ADMINS = [
+  "admin@admin.com",
+  "admin2@admin.com"
+];
+
+/* ===== حماية + تمييز الأدمن ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
+    return;
+  }
+
+  // إذا أدمن → أظهر زر لوحة الأدمن
+  if(ADMINS.includes(user.email)){
+    const adminBtn = document.createElement("a");
+    adminBtn.href = "admin.html";
+    adminBtn.textContent = "🔐 لوحة الأدمن";
+    document.getElementById("headerActions").prepend(adminBtn);
   }
 });
 
 /* ===== تسجيل خروج ===== */
 function logout(){
-  auth.signOut().then(()=>{
-    location.href="login.html";
-  });
+  auth.signOut().then(()=>location.href="login.html");
 }
 
-/* ===== تحميل الخدمات (مُصلَح) ===== */
+/* ===== تحميل الخدمات ===== */
 db.collection("services")
 .onSnapshot(snapshot=>{
   services.innerHTML="";
@@ -158,10 +164,10 @@ function orderService(serviceName){
     status: "جديد",
     createdAt: new Date()
   }).then(()=>{
-    alert("✅ تم إرسال الطلب بنجاح");
+    alert("✅ تم إرسال الطلب");
   });
 }
 </script>
 
 </body>
-  </html>
+</html>
