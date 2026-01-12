@@ -11,6 +11,8 @@ body{
   background:linear-gradient(135deg,#0f172a,#1e3a8a);
   color:#fff;
 }
+
+/* ===== Header ===== */
 header{
   background:#020617;
   padding:15px 20px;
@@ -18,7 +20,17 @@ header{
   justify-content:space-between;
   align-items:center;
 }
-header h2{margin:0}
+header h2{margin:0;font-size:20px}
+.header-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.header-actions a{
+  color:#fff;
+  text-decoration:none;
+  font-size:15px;
+}
 header button{
   background:#dc2626;
   border:none;
@@ -28,6 +40,7 @@ header button{
   cursor:pointer;
 }
 
+/* ===== Content ===== */
 .container{
   max-width:1100px;
   margin:auto;
@@ -73,8 +86,11 @@ header button{
 
 <header>
   <h2>🛒 متجر الخدمات الرقمية</h2>
-  <button onclick="logout()">تسجيل خروج</button>
-  <a href="orders.html" style="color:#fff;margin-left:10px">طلباتي</a>
+
+  <div class="header-actions">
+    <a href="orders.html">📦 طلباتي</a>
+    <button onclick="logout()">تسجيل خروج</button>
+  </div>
 </header>
 
 <div class="container">
@@ -88,7 +104,6 @@ header button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===== Firebase Config ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
@@ -98,21 +113,21 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ===== حماية الصفحة ===== */
+/* حماية الصفحة */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
   }
 });
 
-/* ===== تسجيل خروج ===== */
+/* تسجيل خروج */
 function logout(){
   auth.signOut().then(()=>{
     location.href="login.html";
   });
 }
 
-/* ===== تحميل الخدمات ===== */
+/* تحميل الخدمات */
 db.collection("services")
 .orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
@@ -132,7 +147,7 @@ db.collection("services")
   });
 });
 
-/* ===== طلب خدمة ===== */
+/* طلب خدمة */
 function orderService(serviceName){
   const user = auth.currentUser;
   if(!user) return;
@@ -149,4 +164,4 @@ function orderService(serviceName){
 </script>
 
 </body>
-  </html>
+</html>
