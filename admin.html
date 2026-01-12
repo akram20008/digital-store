@@ -45,12 +45,8 @@ button{
   border-bottom:1px solid #ddd;
   padding:10px 0;
 }
-.logout{
-  background:#dc2626;
-}
-.go-store{
-  background:#16a34a;
-}
+.logout{ background:#dc2626; }
+.go-store{ background:#16a34a; }
 </style>
 </head>
 
@@ -88,6 +84,7 @@ button{
 <h2>📦 الطلبات</h2>
 <div id="orders"></div>
 </div>
+
 </div>
 
 <!-- Firebase -->
@@ -96,6 +93,7 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
+/* ===== Firebase ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
@@ -105,12 +103,10 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const ADMINS = [
-  "admin@admin.com",
-  "admin2@admin.com"
-];
+/* ===== الأدمن ===== */
+const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-// حماية الصفحة (بس تمنع غير الأدمن)
+/* ===== حماية الصفحة ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -121,10 +117,12 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
+/* ===== تسجيل خروج ===== */
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
+/* ===== إضافة خدمة (مُصلَحة) ===== */
 function addService(){
   const name = serviceName.value.trim();
   const desc = serviceDesc.value.trim();
@@ -136,10 +134,12 @@ function addService(){
   }
 
   db.collection("services").add({
-    name,
-    desc,
-    price,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    name: name,
+    desc: desc,
+    price: price,
+    createdAt: new Date() // ✅ ثابت
+  }).then(()=>{
+    alert("✅ تم إضافة الخدمة");
   });
 
   serviceName.value="";
@@ -147,7 +147,9 @@ function addService(){
   servicePrice.value="";
 }
 
+/* ===== عرض الخدمات ===== */
 db.collection("services")
+.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   services.innerHTML="";
   snapshot.forEach(doc=>{
@@ -156,13 +158,15 @@ db.collection("services")
       <div class="service">
         <b>${s.name}</b><br>
         ${s.desc || ""}<br>
-        💰 ${s.price}
+        💰 ${s.price} $
       </div>
     `;
   });
 });
 
+/* ===== عرض الطلبات ===== */
 db.collection("orders")
+.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   orders.innerHTML="";
   snapshot.forEach(doc=>{
@@ -181,6 +185,7 @@ db.collection("orders")
   });
 });
 
+/* ===== تحديث حالة الطلب ===== */
 function updateStatus(id,status){
   db.collection("orders").doc(id).update({status});
 }
