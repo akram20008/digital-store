@@ -24,7 +24,7 @@ body{
   margin-bottom:20px;
 }
 h2{margin-top:0}
-input,textarea,button{
+input,textarea,button,select{
   width:100%;
   padding:10px;
   margin-bottom:10px;
@@ -34,6 +34,7 @@ button{
   color:#fff;
   border:none;
   border-radius:6px;
+  cursor:pointer;
 }
 .service, .order{
   border-bottom:1px solid #ddd;
@@ -51,6 +52,7 @@ button{
 <h1>لوحة تحكم الأدمن 🔐</h1>
 <button class="logout" onclick="logout()">تسجيل خروج</button>
 
+<!-- إضافة خدمة -->
 <div class="box">
 <h2>➕ إضافة خدمة</h2>
 <input id="serviceName" placeholder="اسم الخدمة">
@@ -59,11 +61,13 @@ button{
 <button onclick="addService()">إضافة الخدمة</button>
 </div>
 
+<!-- الخدمات -->
 <div class="box">
 <h2>🛒 الخدمات</h2>
 <div id="services"></div>
 </div>
 
+<!-- الطلبات -->
 <div class="box">
 <h2>📦 الطلبات</h2>
 <div id="orders"></div>
@@ -77,13 +81,11 @@ button{
 
 <script>
 // ===== Firebase Config =====
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
-  projectId: "digital-store-268a9",
-};
-
-firebase.initializeApp(firebaseConfig);
+  projectId: "digital-store-268a9"
+});
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -94,7 +96,7 @@ const ADMINS = [
   "admin2@admin.com"
 ];
 
-// ===== حماية الأدمن =====
+// ===== حماية الصفحة =====
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -107,7 +109,9 @@ auth.onAuthStateChanged(user=>{
 
 // ===== تسجيل خروج =====
 function logout(){
-  auth.signOut().then(()=>location.href="login.html");
+  auth.signOut().then(()=>{
+    location.href="login.html";
+  });
 }
 
 // ===== إضافة خدمة =====
@@ -117,7 +121,7 @@ function addService(){
   const price = servicePrice.value.trim();
 
   if(!name || !price){
-    alert("أدخل البيانات كاملة");
+    alert("أدخل جميع البيانات");
     return;
   }
 
@@ -161,11 +165,22 @@ db.collection("orders")
       <div class="order">
         <b>الخدمة:</b> ${o.service}<br>
         <b>الإيميل:</b> ${o.email}<br>
-        <b>الحالة:</b> ${o.status || "جديد"}
+        <b>الحالة:</b>
+        <select onchange="updateStatus('${doc.id}', this.value)">
+          <option value="جديد" ${o.status==="جديد"?"selected":""}>جديد</option>
+          <option value="تم التنفيذ" ${o.status==="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
+        </select>
       </div>
     `;
   });
 });
+
+// ===== تحديث حالة الطلب =====
+function updateStatus(orderId, status){
+  db.collection("orders").doc(orderId).update({
+    status: status
+  });
+}
 </script>
 
 </body>
