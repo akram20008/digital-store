@@ -4,46 +4,29 @@
 <head>
 <meta charset="UTF-8">
 <title>المتجر</title>
-
-<style>
-body{
-  font-family:Tahoma;
-  background:#f1f5f9;
-  margin:0;
-  padding:40px;
-}
-.box{
-  background:white;
-  padding:30px;
-  border-radius:16px;
-  max-width:500px;
-  margin:auto;
-  box-shadow:0 15px 30px rgba(0,0,0,.1);
-  text-align:center;
-}
-button{
-  padding:12px 20px;
-  background:#dc2626;
-  color:white;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-}
-</style>
 </head>
-
 <body>
 
-<div class="box">
-  <h2>🎉 أهلاً بك في متجر الخدمات</h2>
-  <p>تم تسجيل دخولك بنجاح</p>
-  <button onclick="logout()">تسجيل خروج</button>
-</div>
+<h2>مرحباً بك في المتجر 🛒</h2>
+<button onclick="logout()">تسجيل خروج</button>
 
-<script src="auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script>
-protectPage();
-</script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain:"digital-store-268a9.firebaseapp.com",
+  projectId:"digital-store-268a9"
+});
+const auth=firebase.auth();
 
+auth.onAuthStateChanged(user=>{
+  if(!user) location.href="login.html";
+});
+
+function logout(){
+  auth.signOut().then(()=>location.href="login.html");
+}
+</script>
 </body>
 </html>
