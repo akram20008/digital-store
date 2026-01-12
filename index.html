@@ -97,7 +97,6 @@ header button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-// ===== Firebase =====
 firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
@@ -107,36 +106,27 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== إيميلات الأدمن =====
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-// ===== حماية + إظهار زر الأدمن =====
+/* ===== كل الشغل هنا ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
     return;
   }
 
+  /* زر الأدمن */
   if(ADMINS.includes(user.email)){
-    const adminBtn = document.createElement("a");
-    adminBtn.href = "admin.html";
-    adminBtn.textContent = "🔐 لوحة الأدمن";
-    document.getElementById("headerActions").prepend(adminBtn);
-  }
-});
-
-// ===== تسجيل خروج =====
-function logout(){
-  auth.signOut().then(()=>location.href="login.html");
-}
-
-auth.onAuthStateChanged(user=>{
-  if(!user){
-    location.href="login.html";
-    return;
+    if(!document.getElementById("adminBtn")){
+      const adminBtn = document.createElement("a");
+      adminBtn.id = "adminBtn";
+      adminBtn.href = "admin.html";
+      adminBtn.textContent = "🔐 لوحة الأدمن";
+      document.getElementById("headerActions").prepend(adminBtn);
+    }
   }
 
-  // تحميل الخدمات بعد التأكد من تسجيل الدخول
+  /* تحميل الخدمات (ما بتختفي) */
   db.collection("services")
   .onSnapshot(snapshot=>{
     services.innerHTML="";
@@ -156,7 +146,10 @@ auth.onAuthStateChanged(user=>{
   });
 });
 
-// ===== طلب خدمة =====
+function logout(){
+  auth.signOut().then(()=>location.href="login.html");
+}
+
 function orderService(serviceName){
   const user = auth.currentUser;
   if(!user) return;
@@ -173,4 +166,4 @@ function orderService(serviceName){
 </script>
 
 </body>
-</html>
+  </html>
