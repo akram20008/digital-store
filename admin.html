@@ -84,7 +84,6 @@ button{
 <h2>📦 الطلبات</h2>
 <div id="orders"></div>
 </div>
-
 </div>
 
 <!-- Firebase -->
@@ -93,7 +92,7 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===== Firebase ===== */
+// ===== Firebase =====
 firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
@@ -103,10 +102,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ===== الأدمن ===== */
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-/* ===== حماية الصفحة ===== */
+// ===== حماية الأدمن فقط =====
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -117,12 +115,12 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-/* ===== تسجيل خروج ===== */
+// ===== تسجيل خروج =====
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
-/* ===== إضافة خدمة (مُصلَحة) ===== */
+// ===== إضافة خدمة (مُصلَح) =====
 function addService(){
   const name = serviceName.value.trim();
   const desc = serviceDesc.value.trim();
@@ -134,12 +132,10 @@ function addService(){
   }
 
   db.collection("services").add({
-    name: name,
-    desc: desc,
-    price: price,
-    createdAt: new Date() // ✅ ثابت
-  }).then(()=>{
-    alert("✅ تم إضافة الخدمة");
+    name,
+    desc,
+    price,
+    createdAt: new Date() // ✅ الحل النهائي
   });
 
   serviceName.value="";
@@ -147,9 +143,8 @@ function addService(){
   servicePrice.value="";
 }
 
-/* ===== عرض الخدمات ===== */
+// ===== تحميل الخدمات =====
 db.collection("services")
-.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   services.innerHTML="";
   snapshot.forEach(doc=>{
@@ -158,15 +153,14 @@ db.collection("services")
       <div class="service">
         <b>${s.name}</b><br>
         ${s.desc || ""}<br>
-        💰 ${s.price} $
+        💰 ${s.price}
       </div>
     `;
   });
 });
 
-/* ===== عرض الطلبات ===== */
+// ===== تحميل الطلبات =====
 db.collection("orders")
-.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   orders.innerHTML="";
   snapshot.forEach(doc=>{
@@ -185,11 +179,11 @@ db.collection("orders")
   });
 });
 
-/* ===== تحديث حالة الطلب ===== */
+// ===== تحديث حالة الطلب =====
 function updateStatus(id,status){
   db.collection("orders").doc(id).update({status});
 }
 </script>
 
 </body>
-  </html>
+</html>
