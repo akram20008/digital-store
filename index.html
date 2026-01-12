@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>المتجر الرقمي</title>
+<title>متجر الخدمات الرقمية</title>
 
 <style>
 body{
   margin:0;
   font-family:Tahoma;
-  background:#0f172a;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
   color:#fff;
 }
 header{
@@ -19,59 +18,53 @@ header{
   justify-content:space-between;
   align-items:center;
 }
-header h1{
-  margin:0;
-  font-size:20px;
-}
+header h2{margin:0}
 header button{
   background:#dc2626;
   border:none;
   color:#fff;
   padding:8px 14px;
   border-radius:6px;
+  cursor:pointer;
 }
+
 .container{
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
-  padding:20px;
+  padding:30px 20px;
 }
+
 .services{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:20px;
 }
+
 .card{
   background:#fff;
   color:#000;
   border-radius:14px;
-  padding:18px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
-.card h3{
-  margin-top:0;
-}
-.card p{
-  color:#444;
-}
+.card h3{margin-top:0}
 .price{
+  color:#16a34a;
   font-weight:bold;
-  margin:10px 0;
+  font-size:18px;
 }
 .card button{
-  background:#1e40af;
-  color:#fff;
-  border:none;
+  margin-top:10px;
   width:100%;
   padding:10px;
+  border:none;
   border-radius:8px;
+  background:#1e40af;
+  color:#fff;
+  cursor:pointer;
 }
-.empty{
-  text-align:center;
-  color:#cbd5f5;
-}
-footer{
-  text-align:center;
-  padding:15px;
-  color:#94a3b8;
+.card button:hover{
+  background:#1e3a8a;
 }
 </style>
 </head>
@@ -79,19 +72,14 @@ footer{
 <body>
 
 <header>
-  <h1>🛒 المتجر الرقمي</h1>
+  <h2>🛒 متجر الخدمات الرقمية</h2>
   <button onclick="logout()">تسجيل خروج</button>
 </header>
 
 <div class="container">
-  <h2>الخدمات المتاحة</h2>
-  <div id="services" class="services"></div>
-  <p id="empty" class="empty"></p>
+  <h1>الخدمات المتوفرة</h1>
+  <div class="services" id="services"></div>
 </div>
-
-<footer>
-© جميع الحقوق محفوظة
-</footer>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -99,13 +87,12 @@ footer{
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig = {
+/* ===== Firebase Config ===== */
+firebase.initializeApp({
   apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain: "digital-store-268a9.firebaseapp.com",
-  projectId: "digital-store-268a9",
-};
-
-firebase.initializeApp(firebaseConfig);
+  projectId: "digital-store-268a9"
+});
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -129,25 +116,22 @@ db.collection("services")
 .orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   services.innerHTML="";
-  if(snapshot.empty){
-    empty.innerText="لا توجد خدمات حالياً";
-    return;
-  }
-  empty.innerText="";
   snapshot.forEach(doc=>{
     const s = doc.data();
     services.innerHTML += `
       <div class="card">
         <h3>${s.name}</h3>
         <p>${s.desc || ""}</p>
-        <div class="price">💰 ${s.price}</div>
-        <button onclick="orderService('${s.name}')">اطلب الآن</button>
+        <div class="price">${s.price} $</div>
+        <button onclick="orderService('${s.name}')">
+          اطلب الخدمة
+        </button>
       </div>
     `;
   });
 });
 
-/* ===== إنشاء طلب ===== */
+/* ===== طلب خدمة ===== */
 function orderService(serviceName){
   const user = auth.currentUser;
   if(!user) return;
@@ -156,12 +140,12 @@ function orderService(serviceName){
     service: serviceName,
     email: user.email,
     status: "جديد",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: new Date()
   }).then(()=>{
-    alert("✅ تم إرسال الطلب");
+    alert("✅ تم إرسال الطلب بنجاح");
   });
 }
 </script>
 
 </body>
-</html>
+  </html>
