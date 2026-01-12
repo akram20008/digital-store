@@ -1,64 +1,22 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>متجر الخدمات الرقمية</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>المتجر</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body onload="protect()">
 
-<header class="top">
-  <h1>🛒 متجر الخدمات الرقمية</h1>
-  <nav>
-    <a href="#">الرئيسية</a>
-    <a href="#">تسجيل دخول</a>
-  </nav>
-</header>
+<div class="top">
+  <button class="logout" onclick="logout()">تسجيل خروج</button>
+</div>
 
-<section class="hero">
-  <h2>أفضل الخدمات الرقمية بجودة عالية</h2>
-  <p>تصميم – برمجة – تسويق – إدارة</p>
-</section>
+<div class="card">
+  <h2>🛒 متجر الخدمات الرقمية</h2>
+  <p>أهلاً بك! تم تسجيل دخولك بنجاح 🎉</p>
+</div>
 
-<section class="services">
-  <div class="card">
-    <h3>تصميم موقع</h3>
-    <p>موقع احترافي متجاوب</p>
-    <span>50$</span>
-    <button>اطلب الآن</button>
-  </div>
-
-  <div class="card">
-    <h3>إدارة صفحات</h3>
-    <p>إدارة كاملة للسوشيال ميديا</p>
-    <span>30$</span>
-    <button>اطلب الآن</button>
-  </div>
-
-<script>
-if(!localStorage.getItem("currentUser")){
-  location.href="login.html";
-}
-</script>
-  
-  <div class="card">
-    <h3>برمجة تطبيق</h3>
-    <p>Android / Web</p>
-    <span>100$</span>
-    <button>اطلب الآن</button>
-  </div>
-</section>
-
-<footer>
-  <p>© 2026 متجر الخدمات الرقمية</p>
-</footer>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="auth.js"></script>
-
-<script>
-  protect();
-</script>
-  <button onclick="logout()">تسجيل خروج</button>
 </body>
-  </html>
+</html>
