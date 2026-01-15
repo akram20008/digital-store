@@ -9,9 +9,7 @@
   --main:#2563eb;
   --bg:#020617;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Tajawal,Tahoma;
@@ -23,8 +21,6 @@ body{
   justify-content:center;
   overflow:hidden;
 }
-
-/* ===== ANIMATED BACKGROUND ===== */
 .bg{
   position:fixed;
   inset:0;
@@ -35,11 +31,8 @@ body{
   z-index:-1;
 }
 @keyframes bgMove{
-  from{transform:scale(1)}
   to{transform:scale(1.08)}
 }
-
-/* ===== BOX ===== */
 .box{
   width:92%;
   max-width:440px;
@@ -52,30 +45,15 @@ body{
 }
 @keyframes boxIn{
   from{opacity:0;transform:translateY(40px) scale(.9)}
-  to{opacity:1;transform:none}
 }
-
-h2{
-  text-align:center;
-  margin-bottom:20px;
-  font-size:22px;
-}
-
+h2{text-align:center;margin-bottom:20px}
 .info{
   background:#020617;
   border-radius:14px;
   padding:14px;
   margin-bottom:18px;
-  font-size:15px;
-  line-height:1.8;
 }
-
-/* ===== PAYMENT OPTIONS ===== */
-.payments{
-  display:grid;
-  gap:12px;
-}
-
+.payments{display:grid;gap:12px}
 .pay{
   display:flex;
   align-items:center;
@@ -84,29 +62,21 @@ h2{
   border-radius:16px;
   background:#111827;
   cursor:pointer;
-  transition:.35s;
-  border:1px solid transparent;
+  transition:.3s;
 }
-.pay:hover{
-  transform:translateY(-4px) scale(1.02);
-  background:#1e40af;
-}
-.pay.active{
-  border-color:#4ade80;
-  background:#022c22;
-}
-
+.pay:hover{background:#1e40af}
+.pay.active{background:#022c22;border:1px solid #4ade80}
 .icon{
-  width:42px;
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  background:#020617;
-  font-size:22px;
+  width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;
+  background:#020617;border-radius:12px;
 }
-
+.upload{
+  margin-top:15px;
+  background:#020617;
+  border-radius:14px;
+  padding:14px;
+}
 button{
   width:100%;
   margin-top:20px;
@@ -117,22 +87,12 @@ button{
   color:#fff;
   font-size:16px;
   cursor:pointer;
-  transition:.3s;
 }
-button:hover{
-  transform:scale(1.03);
-}
-
-/* ===== UPLOAD ===== */
-.upload{
-  margin-top:15px;
-  background:#020617;
-  border-radius:14px;
-  padding:14px;
-}
-.upload input{
-  width:100%;
-  color:#fff;
+.back{
+  margin-top:10px;
+  text-align:center;
+  cursor:pointer;
+  color:#93c5fd;
 }
 </style>
 </head>
@@ -151,43 +111,57 @@ button:hover{
 
   <div class="payments">
     <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
-      <div class="icon">🏦</div>
-      بنك فلسطين
+      <div class="icon">🏦</div> بنك فلسطين
     </div>
-
     <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
-      <div class="icon">📱</div>
-      محفظة إلكترونية
+      <div class="icon">📱</div> محفظة إلكترونية
     </div>
-
     <div class="pay" onclick="selectPay(this,'PayPal')">
-      <div class="icon">💳</div>
-      PayPal
+      <div class="icon">💳</div> PayPal
     </div>
-
     <div class="pay" onclick="selectPay(this,'جوال باي')">
-      <div class="icon">📞</div>
-      جوال باي
+      <div class="icon">📞</div> جوال باي
     </div>
   </div>
 
   <div class="upload">
     📷 رفع صورة إثبات الدفع
-    <input type="file" accept="image/*">
+    <input type="file" id="proof" accept="image/*">
   </div>
 
   <button onclick="finish()">تأكيد الطلب</button>
+  <div class="back" onclick="location.href='index.html'">⬅ الرجوع للمتجر</div>
 </div>
 
-<script>
-/* بيانات الخدمة من index */
-document.getElementById("serviceName").textContent =
-  localStorage.getItem("serviceName") || "غير محددة";
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain:"digital-store-268a9.firebaseapp.com",
+  projectId:"digital-store-268a9",
+  storageBucket:"digital-store-268a9.appspot.com"
+});
+
+const auth=firebase.auth();
+const db=firebase.firestore();
+const storage=firebase.storage();
+
+document.getElementById("serviceName").textContent =
+  localStorage.getItem("serviceName");
 document.getElementById("servicePrice").textContent =
-  localStorage.getItem("servicePrice") || "0";
+  localStorage.getItem("servicePrice");
 
 let paymentMethod="";
+let proofFile=null;
+
+document.getElementById("proof").onchange=e=>{
+  proofFile=e.target.files[0];
+};
 
 function selectPay(el,method){
   document.querySelectorAll(".pay")
@@ -196,15 +170,31 @@ function selectPay(el,method){
   paymentMethod=method;
 }
 
-function finish(){
-  if(!paymentMethod){
-    alert("❗ اختر طريقة الدفع");
+async function finish(){
+  const user=auth.currentUser;
+  if(!user || !paymentMethod || !proofFile){
+    alert("❗ أكمل جميع البيانات");
     return;
   }
-  alert("✅ تم إرسال الطلب بنجاح\nطريقة الدفع: "+paymentMethod);
-  location.href="index.html";
+
+  const ref=storage.ref("proofs/"+Date.now()+"_"+proofFile.name);
+  await ref.put(proofFile);
+  const img=await ref.getDownloadURL();
+
+  await db.collection("orders").add({
+    service:localStorage.getItem("serviceName"),
+    price:localStorage.getItem("servicePrice"),
+    paymentMethod,
+    proofImage:img,
+    email:user.email,
+    status:"بانتظار المراجعة",
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  alert("✅ تم إرسال الطلب");
+  location.href="orders.html";
 }
 </script>
 
 </body>
-      </html>
+  </html>
