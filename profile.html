@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>حسابي</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Tajawal,Tahoma;
+  background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
+  color:#fff;
+  min-height:100vh;
+}
+
+.container{
+  max-width:600px;
+  margin:80px auto;
+  padding:30px;
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(18px);
+  border-radius:24px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  animation:slideUp .9s ease;
+}
+
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(60px) scale(.95)}
+  to{opacity:1;transform:none}
+}
+
+h1{
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.info{
+  background:rgba(255,255,255,.15);
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:15px;
+  animation:fade .8s ease forwards;
+}
+
+@keyframes fade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+.label{
+  font-size:13px;
+  color:#c7d2fe;
+}
+
+.value{
+  font-size:16px;
+  margin-top:4px;
+}
+
+.count{
+  font-size:28px;
+  text-align:center;
+  margin-top:10px;
+  color:#4ade80;
+}
+
+button{
+  width:100%;
+  margin-top:25px;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 30px rgba(37,99,235,.8);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>👤 حسابي</h1>
+
+  <div class="info">
+    <div class="label">البريد الإلكتروني</div>
+    <div class="value" id="email">---</div>
+  </div>
+
+  <div class="info">
+    <div class="label">تاريخ إنشاء الحساب</div>
+    <div class="value" id="created">---</div>
+  </div>
+
+  <div class="info">
+    <div class="label">عدد الطلبات</div>
+    <div class="count" id="ordersCount">0</div>
+  </div>
+
+  <button onclick="location.href='index.html'">⬅️ الرجوع للمتجر</button>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain:"digital-store-268a9.firebaseapp.com",
+  projectId:"digital-store-268a9"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+
+  document.getElementById("email").textContent = user.email;
+
+  const date = new Date(user.metadata.creationTime);
+  document.getElementById("created").textContent =
+    date.toLocaleDateString("ar-EG");
+
+  db.collection("orders")
+    .where("email","==",user.email)
+    .onSnapshot(snap=>{
+      document.getElementById("ordersCount").textContent = snap.size;
+    });
+});
+</script>
+
+</body>
+  </html>
