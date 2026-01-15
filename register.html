@@ -7,31 +7,32 @@
 <style>
 body{
   margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
   font-family:Tajawal,Tahoma;
   background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
   color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-.card{
-  width:360px;
+.box{
+  width:95%;
+  max-width:420px;
   background:rgba(255,255,255,.12);
-  backdrop-filter:blur(18px);
+  backdrop-filter:blur(16px);
+  padding:30px;
   border-radius:24px;
-  padding:30px 25px;
-  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  box-shadow:0 30px 80px rgba(0,0,0,.7);
   animation:pop .8s ease;
 }
 
 @keyframes pop{
-  from{opacity:0;transform:scale(.85) translateY(40px)}
+  from{opacity:0;transform:scale(.8) translateY(40px)}
   to{opacity:1;transform:none}
 }
 
-h1{
+h2{
   text-align:center;
   margin-bottom:25px;
 }
@@ -39,86 +40,112 @@ h1{
 input{
   width:100%;
   padding:13px;
-  margin-bottom:12px;
   border:none;
   border-radius:14px;
+  margin-bottom:12px;
   outline:none;
-  font-size:14px;
+  background:rgba(255,255,255,.9);
 }
 
-/* checkbox */
 .check{
   display:flex;
   align-items:center;
-  gap:10px;
-  font-size:14px;
-  margin:10px 0 15px;
-  animation:fadeUp .8s ease;
-}
-
-.check input{
-  width:18px;
-  height:18px;
-  accent-color:#2563eb;
-  cursor:pointer;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(15px)}
-  to{opacity:1;transform:none}
+  gap:8px;
+  font-size:13px;
+  margin:10px 0;
 }
 
 button{
   width:100%;
   padding:13px;
-  margin-top:10px;
   border:none;
   border-radius:16px;
-  cursor:pointer;
   background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
-  font-size:15px;
+  font-size:16px;
+  cursor:pointer;
   transition:.3s;
 }
 
 button:hover{
   transform:scale(1.05);
-  box-shadow:0 0 30px rgba(37,99,235,.8);
 }
 
-.login-link{
+.link{
   text-align:center;
-  margin-top:18px;
-  font-size:14px;
+  margin-top:15px;
+  font-size:13px;
 }
 
-.login-link a{
-  color:#60a5fa;
-  text-decoration:none;
+.link a{color:#60a5fa;text-decoration:none}
+
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.4s;
+}
+
+.modal.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.modal-box{
+  background:linear-gradient(135deg,#1e3a8a,#020617);
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:360px;
+  text-align:center;
+  transform:scale(.7);
+  transition:.4s;
+}
+
+.modal.show .modal-box{
+  transform:scale(1);
+}
+
+.modal-box button{
+  margin-top:15px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>✨ إنشاء حساب</h1>
+<div class="box">
+  <h2>✨ إنشاء حساب</h2>
 
   <input id="username" placeholder="اسم المستخدم">
   <input id="email" type="email" placeholder="البريد الإلكتروني">
-  <input id="password" type="password" placeholder="كلمة السر">
-  <input id="confirm" type="password" placeholder="تأكيد كلمة السر">
+  <input id="password" type="password" placeholder="كلمة المرور">
+  <input id="confirm" type="password" placeholder="تأكيد كلمة المرور">
 
-  <!-- checkbox -->
-  <label class="check">
+  <div class="check">
     <input type="checkbox" id="agree">
-    أوافق على الشروط والأحكام
-  </label>
+    <label for="agree">أوافق على الشروط والأحكام</label>
+  </div>
 
   <button onclick="register()">إنشاء الحساب</button>
 
-  <div class="login-link">
-    عندك حساب؟ <a href="login.html">تسجيل الدخول</a>
+  <div class="link">
+    لديك حساب؟ <a href="login.html">تسجيل دخول</a>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-box" id="modalBox">
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <button onclick="closeModal()">حسناً</button>
   </div>
 </div>
 
@@ -129,50 +156,67 @@ button:hover{
 
 <script>
 firebase.initializeApp({
-  apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
-  authDomain: "digital-store-268a9.firebaseapp.com",
-  projectId: "digital-store-268a9"
+  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain:"digital-store-268a9.firebaseapp.com",
+  projectId:"digital-store-268a9"
 });
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+const modal=document.getElementById("modal");
+const mTitle=document.getElementById("mTitle");
+const mText=document.getElementById("mText");
+const modalBox=document.getElementById("modalBox");
+
+function showModal(t,txt,type="info"){
+  mTitle.textContent=t;
+  mText.textContent=txt;
+  modalBox.style.background =
+    type==="error"
+    ?"linear-gradient(135deg,#7f1d1d,#020617)"
+    :"linear-gradient(135deg,#166534,#020617)";
+  modal.classList.add("show");
+}
+
+function closeModal(){
+  modal.classList.remove("show");
+}
 
 function register(){
-  const username = document.getElementById("username").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const confirm = document.getElementById("confirm").value;
-  const agree = document.getElementById("agree").checked;
+  const user=username.value.trim();
+  const email=email.value.trim();
+  const pass=password.value;
+  const conf=confirm.value;
 
-  if(!username || !email || !password || !confirm){
-    alert("❌ جميع الحقول مطلوبة");
-    return;
-  }
+  if(!user||!email||!pass||!conf)
+    return showModal("خطأ ❌","جميع الحقول مطلوبة","error");
 
-  if(password !== confirm){
-    alert("❌ كلمة السر غير متطابقة");
-    return;
-  }
+  if(pass!==conf)
+    return showModal("خطأ ❌","كلمتا السر غير متطابقتين","error");
 
-  if(!agree){
-    alert("❌ يجب الموافقة على الشروط والأحكام");
-    return;
-  }
+  if(!agree.checked)
+    return showModal("تنبيه ⚠️","يجب الموافقة على الشروط","error");
 
-  auth.createUserWithEmailAndPassword(email,password)
-  .then(res=>{
-    return db.collection("users").doc(res.user.uid).set({
-      username,
+  auth.createUserWithEmailAndPassword(email,pass)
+  .then(cred=>{
+    return db.collection("users").doc(cred.user.uid).set({
+      username:user,
       email,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
   })
   .then(()=>{
-    alert("✅ تم إنشاء الحساب بنجاح");
-    location.href="index.html";
+    showModal("تم ✅","تم إنشاء الحساب بنجاح");
+    setTimeout(()=>location.href="index.html",2000);
   })
   .catch(err=>{
-    alert("❌ "+err.message);
+    if(err.code==="auth/email-already-in-use")
+      showModal("خطأ ❌","الإيميل مستخدم مسبقًا","error");
+    else if(err.code==="auth/network-request-failed")
+      showModal("خطأ ❌","مشكلة اتصال بالإنترنت","error");
+    else
+      showModal("خطأ ❌",err.message,"error");
   });
 }
 </script>
