@@ -15,37 +15,40 @@
 body{
   margin:0;
   font-family:Tajawal,Tahoma;
+  background:#020617;
   color:#fff;
-  background:
-    radial-gradient(circle at top,#1e3a8a,#020617 70%);
-  background-attachment:fixed;
   overflow-x:hidden;
 }
 
-/* ===== PARALLAX BACKGROUND ===== */
-.parallax{
+/* ===== BACKGROUND PERSON ===== */
+.bg-person{
   position:fixed;
   inset:0;
   background:
-    linear-gradient(120deg,rgba(37,99,235,.25),transparent 60%),
-    url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
-  background-size:cover;
-  background-position:center;
-  transform:translateZ(0);
-  z-index:-1;
+    linear-gradient(to bottom,rgba(2,6,23,.7),#020617 85%),
+    url("https://images.unsplash.com/photo-1604079628041-94301bb21b91?auto=format&fit=crop&w=1200&q=80")
+    center top / cover no-repeat;
+  z-index:-2;
+  animation:breath 8s ease-in-out infinite;
+}
+
+@keyframes breath{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.04)}
 }
 
 /* ===== HEADER ===== */
 header{
   position:sticky;
   top:0;
-  z-index:10;
+  z-index:100;
   background:rgba(2,6,23,.75);
   backdrop-filter:blur(14px);
   padding:14px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  box-shadow:0 10px 40px rgba(0,0,0,.4);
 }
 
 header h2{margin:0;font-size:18px}
@@ -75,20 +78,22 @@ button{
   max-width:1200px;
   margin:auto;
   padding:50px 15px;
+  position:relative;
+  z-index:2;
 }
 
 h1{
   text-align:center;
-  font-size:28px;
   margin-bottom:40px;
-  animation:titleIn 1s ease;
+  font-size:26px;
+  animation:fadeDown 1s ease;
 }
 
 /* ===== SERVICES GRID ===== */
 .services{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:26px;
+  gap:28px;
 }
 
 /* ===== CARD ===== */
@@ -96,46 +101,50 @@ h1{
   background:linear-gradient(
     160deg,
     rgba(255,255,255,.18),
-    rgba(255,255,255,.06)
+    rgba(255,255,255,.05)
   );
   backdrop-filter:blur(18px);
-  border-radius:24px;
+  border-radius:22px;
   padding:22px;
   box-shadow:0 25px 60px rgba(0,0,0,.45);
-  text-align:center;
-
+  position:relative;
+  transform:translateY(50px) scale(.95);
   opacity:0;
-  transform:translateY(50px) scale(.92);
   animation:cardIn .9s ease forwards;
 }
 
 .card:hover{
-  transform:translateY(-14px) scale(1.04);
-  box-shadow:0 40px 90px rgba(0,0,0,.65);
+  transform:translateY(-12px) scale(1.04);
+  box-shadow:0 35px 90px rgba(0,0,0,.7);
 }
 
 /* ===== IMAGE ===== */
 .card img{
-  width:70px;
-  height:70px;
+  width:72px;
+  height:72px;
   object-fit:contain;
-  margin-bottom:14px;
+  display:block;
+  margin:auto;
+  margin-bottom:15px;
   animation:float 4s ease-in-out infinite;
 }
 
 /* ===== TEXT ===== */
 .card h3{
   margin:0 0 8px;
+  text-align:center;
   font-size:18px;
 }
 
 .card p{
+  text-align:center;
   font-size:14px;
   color:#e5e7eb;
-  min-height:38px;
+  min-height:40px;
 }
 
 .price{
+  text-align:center;
   margin-top:12px;
   font-size:20px;
   font-weight:bold;
@@ -154,7 +163,7 @@ h1{
 }
 
 .card button:hover{
-  transform:scale(1.07);
+  transform:scale(1.06);
   box-shadow:0 0 30px rgba(37,99,235,.8);
 }
 
@@ -163,21 +172,21 @@ h1{
   to{opacity:1;transform:none}
 }
 
-@keyframes titleIn{
+@keyframes fadeDown{
   from{opacity:0;transform:translateY(-25px)}
   to{opacity:1;transform:none}
 }
 
 @keyframes float{
   0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
+  50%{transform:translateY(-8px)}
 }
 </style>
 </head>
 
 <body>
 
-<div class="parallax" id="parallax"></div>
+<div class="bg-person"></div>
 
 <header>
   <h2>🛒 متجر الخدمات الرقمية</h2>
@@ -209,7 +218,6 @@ const db = firebase.firestore();
 const servicesDiv = document.getElementById("services");
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-/* ===== AUTH ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){ location.href="login.html"; return; }
   if(ADMINS.includes(user.email)){
@@ -220,25 +228,16 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-/* ===== SMART SORT + LOAD ===== */
 db.collection("services")
 .orderBy("createdAt","desc")
 .onSnapshot(snap=>{
-  let data=[];
-  snap.forEach(d=>data.push(d.data()));
-
-  data.sort((a,b)=>{
-    if(b.price && a.price) return b.price - a.price;
-    if(b.price) return 1;
-    if(a.price) return -1;
-    return 0;
-  });
-
   servicesDiv.innerHTML="";
-  data.forEach((s,i)=>{
+  let i=0;
+  snap.forEach(doc=>{
+    const s=doc.data();
     servicesDiv.innerHTML+=`
-      <div class="card" style="animation-delay:${i*.12}s">
-        <img src="${s.image || 'https://upload.wikimedia.org/wikipedia/commons/7/75/Netflix_icon.svg'}">
+      <div class="card" style="animation-delay:${i++ * .12}s">
+        <img src="${s.image || 'https://cdn-icons-png.flaticon.com/512/5968/5968520.png'}">
         <h3>${s.name}</h3>
         <p>${s.desc || ""}</p>
         <div class="price">$ ${s.price}</div>
@@ -247,7 +246,6 @@ db.collection("services")
   });
 });
 
-/* ===== ORDER ===== */
 function orderService(name){
   const u=auth.currentUser;
   if(!u) return;
@@ -260,16 +258,9 @@ function orderService(name){
   alert("✅ تم إرسال الطلب");
 }
 
-/* ===== LOGOUT ===== */
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
-
-/* ===== PARALLAX EFFECT ===== */
-window.addEventListener("scroll",()=>{
-  document.getElementById("parallax").style.transform =
-    `translateY(${window.scrollY * .25}px)`;
-});
 </script>
 
 </body>
