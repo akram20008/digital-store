@@ -2,127 +2,69 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة تحكم الأدمن</title>
+<title>لوحة الأدمن</title>
 
 <style>
 body{
   margin:0;
   font-family:Tahoma;
-  background:linear-gradient(135deg,#020617,#1e3a8a);
+  background:#0f172a;
   color:#fff;
 }
-
-header{
-  background:rgba(2,6,23,.9);
-  backdrop-filter:blur(8px);
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:100;
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
 }
-
-header h2{margin:0;font-size:18px}
-
-header .actions{
+.top-actions{
   display:flex;
   gap:10px;
+  margin-bottom:20px;
 }
-
-header button{
-  border:none;
-  padding:7px 14px;
-  border-radius:8px;
-  cursor:pointer;
-  color:#fff;
-}
-
-.logout{background:#dc2626}
-.store{background:#16a34a}
-
-.container{
-  max-width:1000px;
-  margin:auto;
-  padding:30px 15px;
-  animation:fadeIn .8s ease;
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:none}
-}
-
 .box{
   background:#fff;
-  color:#020617;
-  border-radius:18px;
+  color:#000;
   padding:20px;
-  margin-bottom:25px;
-  box-shadow:0 15px 35px rgba(0,0,0,.25);
+  border-radius:14px;
+  margin-bottom:20px;
 }
-
-.box h2{
-  margin-top:0;
-  font-size:18px;
-}
-
-input,textarea,select,button{
+h2{margin-top:0}
+input,textarea,button,select{
   width:100%;
   padding:10px;
   margin-bottom:10px;
+}
+button{
+  background:#1e40af;
+  color:#fff;
+  border:none;
   border-radius:8px;
-  border:1px solid #cbd5f5;
-  font-family:inherit;
+  cursor:pointer;
 }
-
-.add-btn{
-  background:linear-gradient(135deg,#2563eb,#1e40af);
-  color:#fff;
-  border:none;
+.logout{background:#dc2626}
+.go-store{background:#16a34a}
+.service{
+  border-bottom:1px solid #ddd;
+  padding:10px 0;
 }
-
-.service,.order{
-  border-bottom:1px solid #e5e7eb;
-  padding:12px 0;
-  animation:slide .4s ease;
-}
-
-@keyframes slide{
-  from{opacity:0;transform:translateX(20px)}
-  to{opacity:1;transform:none}
-}
-
-.price{color:#16a34a;font-weight:bold}
-
-.delete{
-  background:#dc2626;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:13px;
-  margin-top:5px;
-}
-
-.status{
-  margin-top:6px;
+.service img{
+  width:70px;
+  border-radius:10px;
+  display:block;
+  margin:6px 0;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h2>🔐 لوحة تحكم الأدمن</h2>
-  <div class="actions">
-    <button class="store" onclick="location.href='index.html'">🛒 المتجر</button>
-    <button class="logout" onclick="logout()">خروج</button>
-  </div>
-</header>
-
 <div class="container">
+<h1>لوحة تحكم الأدمن 🔐</h1>
+
+<div class="top-actions">
+  <button class="go-store" onclick="location.href='index.html'">🛒 المتجر</button>
+  <button class="logout" onclick="logout()">تسجيل خروج</button>
+</div>
 
 <!-- إضافة خدمة -->
 <div class="box">
@@ -130,7 +72,8 @@ input,textarea,select,button{
 <input id="serviceName" placeholder="اسم الخدمة">
 <textarea id="serviceDesc" placeholder="وصف الخدمة"></textarea>
 <input id="servicePrice" type="number" placeholder="السعر">
-<button class="add-btn" onclick="addService()">إضافة الخدمة</button>
+<input id="serviceImage" placeholder="رابط صورة الخدمة (URL)">
+<button onclick="addService()">إضافة الخدمة</button>
 </div>
 
 <!-- الخدمات -->
@@ -144,7 +87,6 @@ input,textarea,select,button{
 <h2>📦 الطلبات</h2>
 <div id="orders"></div>
 </div>
-
 </div>
 
 <!-- Firebase -->
@@ -164,79 +106,82 @@ const db = firebase.firestore();
 
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-/* حماية الأدمن */
+// حماية الأدمن
 auth.onAuthStateChanged(user=>{
-  if(!user) location.href="login.html";
-  else if(!ADMINS.includes(user.email)) location.href="index.html";
+  if(!user) return location.href="login.html";
+  if(!ADMINS.includes(user.email)) location.href="index.html";
 });
 
-/* خروج */
+// تسجيل خروج
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
-/* إضافة خدمة */
+// إضافة خدمة
 function addService(){
-  if(!serviceName.value || !servicePrice.value) return alert("أدخل البيانات");
+  const name = serviceName.value.trim();
+  const desc = serviceDesc.value.trim();
+  const price = servicePrice.value.trim();
+  const image = serviceImage.value.trim();
+
+  if(!name || !price){
+    alert("أدخل البيانات كاملة");
+    return;
+  }
 
   db.collection("services").add({
-    name:serviceName.value,
-    desc:serviceDesc.value,
-    price:servicePrice.value,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    name,
+    desc,
+    price,
+    image,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   serviceName.value="";
   serviceDesc.value="";
   servicePrice.value="";
+  serviceImage.value="";
 }
 
-/* عرض الخدمات + حذف */
-db.collection("services").orderBy("createdAt","desc")
-.onSnapshot(snap=>{
+// عرض الخدمات
+db.collection("services")
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
   services.innerHTML="";
-  snap.forEach(doc=>{
-    const s=doc.data();
-    services.innerHTML+=`
+  snapshot.forEach(doc=>{
+    const s = doc.data();
+    services.innerHTML += `
       <div class="service">
-        <b>${s.name}</b><br>
-        ${s.desc||""}<br>
-        <span class="price">${s.price}$</span><br>
-        <button class="delete" onclick="deleteService('${doc.id}')">🗑 حذف</button>
-      </div>`;
+        <b>${s.name}</b>
+        ${s.image ? `<img src="${s.image}">` : ""}
+        <div>${s.desc || ""}</div>
+        💰 ${s.price}
+      </div>
+    `;
   });
 });
 
-function deleteService(id){
-  if(confirm("حذف الخدمة؟")){
-    db.collection("services").doc(id).delete();
-  }
-}
-
-/* الطلبات */
-db.collection("orders").orderBy("createdAt","desc")
-.onSnapshot(snap=>{
+// عرض الطلبات
+db.collection("orders")
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
   orders.innerHTML="";
-  snap.forEach(doc=>{
-    const o=doc.data();
-    orders.innerHTML+=`
-      <div class="order">
+  snapshot.forEach(doc=>{
+    const o = doc.data();
+    orders.innerHTML += `
+      <div class="service">
         <b>${o.service}</b><br>
-        ${o.email}
-        <div class="status">
-          <select onchange="updateStatus('${doc.id}',this.value)">
-            <option ${o.status=="جديد"?"selected":""}>جديد</option>
-            <option ${o.status=="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
-          </select>
-        </div>
-      </div>`;
+        ${o.email}<br>
+        الحالة:
+        <select onchange="db.collection('orders').doc('${doc.id}').update({status:this.value})">
+          <option ${o.status==="جديد"?"selected":""}>جديد</option>
+          <option ${o.status==="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
+        </select>
+      </div>
+    `;
   });
 });
-
-function updateStatus(id,val){
-  db.collection("orders").doc(id).update({status:val});
-}
 </script>
 
 </body>
-  </html>
+</html>
