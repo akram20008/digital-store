@@ -161,14 +161,18 @@ firebase.initializeApp({
   projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const servicesDiv=document.getElementById("services");
-const ADMINS=["admin@admin.com","admin2@admin.com"];
+const auth = firebase.auth();
+const db = firebase.firestore();
+const servicesDiv = document.getElementById("services");
+const headerActions = document.getElementById("headerActions"); // ✅ الإصلاح
+const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
 /* Auth */
 auth.onAuthStateChanged(user=>{
-  if(!user){location.href="login.html";return;}
+  if(!user){
+    location.href="login.html";
+    return;
+  }
   if(ADMINS.includes(user.email) && !document.getElementById("adminBtn")){
     const a=document.createElement("a");
     a.id="adminBtn";
