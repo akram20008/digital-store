@@ -9,7 +9,6 @@
   --main:#2563eb;
   --dark:#020617;
 }
-
 *{box-sizing:border-box}
 
 body{
@@ -31,7 +30,6 @@ body{
   z-index:-2;
   animation:breath 8s ease-in-out infinite;
 }
-
 @keyframes breath{
   0%,100%{transform:scale(1)}
   50%{transform:scale(1.04)}
@@ -50,20 +48,16 @@ header{
   align-items:center;
   box-shadow:0 10px 40px rgba(0,0,0,.4);
 }
-
 header h2{margin:0;font-size:18px}
-
 .header-actions{
   display:flex;
   gap:10px;
 }
-
 .header-actions a{
   color:#e5e7eb;
   text-decoration:none;
   font-size:14px;
 }
-
 button{
   background:#dc2626;
   border:none;
@@ -81,7 +75,6 @@ button{
   position:relative;
   z-index:2;
 }
-
 h1{
   text-align:center;
   margin-bottom:40px;
@@ -95,7 +88,6 @@ h1{
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:28px;
 }
-
 .card{
   background:linear-gradient(
     160deg,
@@ -110,11 +102,9 @@ h1{
   opacity:0;
   animation:cardIn .9s ease forwards;
 }
-
 .card:hover{
   transform:translateY(-12px) scale(1.04);
 }
-
 .card img{
   width:72px;
   height:72px;
@@ -124,11 +114,9 @@ h1{
   margin-bottom:15px;
   animation:float 4s ease-in-out infinite;
 }
-
 .card h3{text-align:center;margin:0 0 8px}
 .card p{text-align:center;font-size:14px;color:#e5e7eb}
 .price{text-align:center;color:#4ade80;font-size:20px;font-weight:bold}
-
 .card button{
   width:100%;
   margin-top:18px;
@@ -140,66 +128,6 @@ h1{
 @keyframes cardIn{to{opacity:1;transform:none}}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-25px)}}
 @keyframes float{50%{transform:translateY(-8px)}}
-
-/* NOTIFICATION */
-.notify{
-  position:fixed;
-  bottom:25px;
-  right:25px;
-  background:linear-gradient(135deg,#2563eb,#1e40af);
-  padding:16px 22px;
-  border-radius:16px;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
-  opacity:0;
-  transform:translateY(40px) scale(.9);
-  transition:.5s;
-  z-index:9999;
-}
-.notify.show{opacity:1;transform:none}
-
-/* ===== PAYMENT MODAL (ADDITION) ===== */
-.payment-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  opacity:0;
-  pointer-events:none;
-  transition:.4s;
-  z-index:99999;
-}
-.payment-modal.show{
-  opacity:1;
-  pointer-events:auto;
-}
-.payment-box{
-  background:#020617;
-  padding:25px;
-  border-radius:20px;
-  width:90%;
-  max-width:420px;
-  box-shadow:0 30px 80px rgba(0,0,0,.7);
-  animation:pop .4s ease;
-}
-@keyframes pop{
-  from{transform:scale(.8);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-.payment-box h3{text-align:center;margin-bottom:20px}
-.pay-option{
-  background:#111827;
-  padding:15px;
-  border-radius:14px;
-  margin-bottom:12px;
-  cursor:pointer;
-  text-align:center;
-  transition:.3s;
-}
-.pay-option:hover{
-  background:#1e40af;
-}
 </style>
 </head>
 
@@ -221,17 +149,7 @@ h1{
   <div class="services" id="services"></div>
 </div>
 
-<div id="notify" class="notify"></div>
-
-<!-- ===== PAYMENT MODAL ===== -->
-<div id="paymentModal" class="payment-modal">
-  <div class="payment-box">
-    <h3>💳 اختر طريقة الدفع</h3>
-    <div class="pay-option" onclick="confirmPayment('بنك فلسطين')">🏦 بنك فلسطين</div>
-    <div class="pay-option" onclick="confirmPayment('محفظة إلكترونية')">📱 محفظة إلكترونية</div>
-  </div>
-</div>
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -246,49 +164,46 @@ firebase.initializeApp({
 const auth=firebase.auth();
 const db=firebase.firestore();
 const servicesDiv=document.getElementById("services");
-const notify=document.getElementById("notify");
 const ADMINS=["admin@admin.com","admin2@admin.com"];
 
-let selectedService=null;
+/* Auth */
+auth.onAuthStateChanged(user=>{
+  if(!user){location.href="login.html";return;}
+  if(ADMINS.includes(user.email) && !document.getElementById("adminBtn")){
+    const a=document.createElement("a");
+    a.id="adminBtn";
+    a.href="admin.html";
+    a.textContent="🔐 لوحة الأدمن";
+    headerActions.prepend(a);
+  }
+});
 
-db.collection("services").orderBy("createdAt","desc").onSnapshot(snap=>{
+/* Load services */
+db.collection("services")
+.orderBy("createdAt","desc")
+.onSnapshot(snap=>{
   servicesDiv.innerHTML="";
   let i=0;
   snap.forEach(doc=>{
     const s=doc.data();
     servicesDiv.innerHTML+=`
       <div class="card" style="animation-delay:${i++*.12}s">
-        <img src="${s.image}">
+        <img src="${s.image || 'https://cdn-icons-png.flaticon.com/512/5968/5968520.png'}">
         <h3>${s.name}</h3>
         <p>${s.desc||""}</p>
         <div class="price">$ ${s.price}</div>
-        <button onclick="orderService('${s.name}')">اطلب الخدمة</button>
+        <button onclick="orderService('${s.name}','${s.price}')">
+          اطلب الخدمة
+        </button>
       </div>`;
   });
 });
 
-/* ===== ORDER FLOW ===== */
-function orderService(name){
-  selectedService=name;
-  document.getElementById("paymentModal").classList.add("show");
-}
-
-function confirmPayment(method){
-  const u=auth.currentUser;
-  if(!u) return;
-
-  db.collection("orders").add({
-    service:selectedService,
-    email:u.email,
-    paymentMethod:method,
-    status:"بانتظار الدفع",
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  document.getElementById("paymentModal").classList.remove("show");
-  notify.textContent="✅ تم إنشاء الطلب، بانتظار الدفع";
-  notify.classList.add("show");
-  setTimeout(()=>notify.classList.remove("show"),3000);
+/* ORDER → PAYMENT */
+function orderService(name,price){
+  localStorage.setItem("serviceName",name);
+  localStorage.setItem("servicePrice",price);
+  location.href="payment.html";
 }
 
 function logout(){
