@@ -5,67 +5,168 @@
 <title>تفاصيل الدفع</title>
 
 <style>
+:root{
+  --main:#2563eb;
+  --bg:#020617;
+}
+*{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Tajawal,Tahoma;
-  background:#020617;
+  background:linear-gradient(160deg,#020617,#020617 60%,#030712);
   color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
+
+/* الخلفية المتحركة */
+.bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at top right,#2563eb33,transparent 60%),
+    radial-gradient(circle at bottom left,#22c55e33,transparent 60%);
+  animation:bgMove 10s ease-in-out infinite alternate;
+  z-index:-1;
+}
+@keyframes bgMove{
+  from{transform:scale(1)}
+  to{transform:scale(1.08)}
+}
+
+/* الصندوق */
 .box{
-  width:95%;
-  max-width:420px;
+  width:92%;
+  max-width:440px;
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(20px);
+  border-radius:24px;
+  padding:26px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7);
+  animation:boxIn .7s ease;
+}
+@keyframes boxIn{
+  from{opacity:0;transform:translateY(40px) scale(.9)}
+  to{opacity:1;transform:none}
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+  font-size:22px;
+}
+
+.info{
   background:#020617;
-  border:1px solid #1e293b;
-  border-radius:20px;
-  padding:20px;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:18px;
+  font-size:15px;
+  line-height:1.8;
+}
+
+/* طرق الدفع */
+.payments{
+  display:grid;
+  gap:12px;
 }
 .pay{
+  display:flex;
+  align-items:center;
+  gap:12px;
   padding:14px;
+  border-radius:16px;
   background:#111827;
-  border-radius:14px;
-  margin-bottom:10px;
   cursor:pointer;
+  transition:.35s;
+  border:1px solid transparent;
 }
-.pay.active{
+.pay:hover{
+  transform:translateY(-4px) scale(1.02);
   background:#1e40af;
 }
+.pay.active{
+  border-color:#4ade80;
+  background:#022c22;
+}
+.icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:#020617;
+  font-size:22px;
+}
+
+.upload{
+  margin-top:15px;
+  background:#020617;
+  border-radius:14px;
+  padding:14px;
+}
+.upload input{
+  width:100%;
+  color:#fff;
+}
+
 button{
   width:100%;
-  margin-top:15px;
+  margin-top:20px;
   padding:14px;
   border:none;
-  border-radius:16px;
-  background:#2563eb;
+  border-radius:18px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
   font-size:16px;
+  cursor:pointer;
+  transition:.3s;
 }
-input{
-  width:100%;
-  margin-top:10px;
-}
+button:hover{transform:scale(1.03)}
 </style>
 </head>
 
 <body>
 
+<div class="bg"></div>
+
 <div class="box">
-  <h3>تفاصيل الدفع</h3>
-  <p>الخدمة: <b id="serviceName"></b></p>
-  <p>السعر: $<b id="servicePrice"></b></p>
+  <h2>💳 تفاصيل الدفع</h2>
 
-  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">🏦 بنك فلسطين</div>
-  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">📱 محفظة إلكترونية</div>
-  <div class="pay" onclick="selectPay(this,'PayPal')">💳 PayPal</div>
-  <div class="pay" onclick="selectPay(this,'جوال باي')">📞 جوال باي</div>
+  <div class="info">
+    📦 الخدمة: <b id="serviceName"></b><br>
+    💰 السعر: <b>$<span id="servicePrice"></span></b>
+  </div>
 
-  <input type="file" id="proof" accept="image/*">
-  <button onclick="confirmOrder()">تأكيد الطلب</button>
+  <div class="payments">
+    <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
+      <div class="icon">🏦</div> بنك فلسطين
+    </div>
+    <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
+      <div class="icon">📱</div> محفظة إلكترونية
+    </div>
+    <div class="pay" onclick="selectPay(this,'PayPal')">
+      <div class="icon">💳</div> PayPal
+    </div>
+    <div class="pay" onclick="selectPay(this,'جوال باي')">
+      <div class="icon">📞</div> جوال باي
+    </div>
+  </div>
+
+  <div class="upload">
+    📷 رفع صورة إثبات الدفع
+    <input type="file" id="proof" accept="image/*">
+  </div>
+
+  <button onclick="confirmOrder()">🚀 تأكيد الطلب</button>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -78,43 +179,50 @@ firebase.initializeApp({
 });
 
 const auth = firebase.auth();
-const db = firebase.firestore();
+const db   = firebase.firestore();
 
-document.getElementById("serviceName").textContent = localStorage.getItem("serviceName");
-document.getElementById("servicePrice").textContent = localStorage.getItem("servicePrice");
+/* بيانات الخدمة */
+const serviceName  = localStorage.getItem("serviceName")  || "غير محددة";
+const servicePrice = localStorage.getItem("servicePrice") || "0";
 
-let paymentMethod="";
+document.getElementById("serviceName").textContent  = serviceName;
+document.getElementById("servicePrice").textContent = servicePrice;
 
+let paymentMethod = "";
+
+/* اختيار طريقة الدفع */
 function selectPay(el,method){
   document.querySelectorAll(".pay").forEach(p=>p.classList.remove("active"));
   el.classList.add("active");
-  paymentMethod=method;
+  paymentMethod = method;
 }
 
+/* تأكيد الطلب */
 function confirmOrder(){
-  const file=document.getElementById("proof").files[0];
-  if(!paymentMethod || !file){
-    alert("اختَر طريقة الدفع وارفع صورة");
+  const user = auth.currentUser;
+  if(!user){
+    alert("❌ يجب تسجيل الدخول");
+    location.href="login.html";
+    return;
+  }
+  if(!paymentMethod){
+    alert("❗ اختر طريقة الدفع");
     return;
   }
 
-  auth.onAuthStateChanged(user=>{
-    if(!user){
-      alert("سجل دخولك أولاً");
-      return;
-    }
-
-    db.collection("orders").add({
-      service: localStorage.getItem("serviceName"),
-      price: localStorage.getItem("servicePrice"),
-      paymentMethod,
-      email: user.email,
-      status:"قيد المراجعة",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(()=>{
-      alert("تم إرسال الطلب");
-      location.href="orders.html";
-    });
+  db.collection("orders").add({
+    uid: user.uid,
+    email: user.email,
+    service: serviceName,
+    price: servicePrice,
+    paymentMethod: paymentMethod,
+    status: "قيد المراجعة",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("✅ تم إرسال الطلب بنجاح");
+    location.href="orders.html";
+  }).catch(err=>{
+    alert("خطأ: " + err.message);
   });
 }
 </script>
