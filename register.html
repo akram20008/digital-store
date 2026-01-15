@@ -12,8 +12,7 @@ body{
   align-items:center;
   justify-content:center;
   font-family:Tajawal,Tahoma;
-  background:
-    radial-gradient(circle at top,#1e3a8a,#020617 70%);
+  background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
   color:#fff;
 }
 
@@ -45,6 +44,28 @@ input{
   border-radius:14px;
   outline:none;
   font-size:14px;
+}
+
+/* checkbox */
+.check{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  margin:10px 0 15px;
+  animation:fadeUp .8s ease;
+}
+
+.check input{
+  width:18px;
+  height:18px;
+  accent-color:#2563eb;
+  cursor:pointer;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(15px)}
+  to{opacity:1;transform:none}
 }
 
 button{
@@ -88,6 +109,12 @@ button:hover{
   <input id="password" type="password" placeholder="كلمة السر">
   <input id="confirm" type="password" placeholder="تأكيد كلمة السر">
 
+  <!-- checkbox -->
+  <label class="check">
+    <input type="checkbox" id="agree">
+    أوافق على الشروط والأحكام
+  </label>
+
   <button onclick="register()">إنشاء الحساب</button>
 
   <div class="login-link">
@@ -115,6 +142,7 @@ function register(){
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const confirm = document.getElementById("confirm").value;
+  const agree = document.getElementById("agree").checked;
 
   if(!username || !email || !password || !confirm){
     alert("❌ جميع الحقول مطلوبة");
@@ -126,11 +154,16 @@ function register(){
     return;
   }
 
+  if(!agree){
+    alert("❌ يجب الموافقة على الشروط والأحكام");
+    return;
+  }
+
   auth.createUserWithEmailAndPassword(email,password)
   .then(res=>{
     return db.collection("users").doc(res.user.uid).set({
-      username:username,
-      email:email,
+      username,
+      email,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
   })
