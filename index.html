@@ -14,7 +14,7 @@ body{
 
 /* ===== Header ===== */
 header{
-  background:rgba(2,6,23,.9);
+  background:rgba(2,6,23,.95);
   backdrop-filter:blur(10px);
   padding:15px 20px;
   display:flex;
@@ -45,8 +45,8 @@ button{
   background:#dc2626;
   border:none;
   color:#fff;
-  padding:7px 14px;
-  border-radius:8px;
+  padding:8px 14px;
+  border-radius:10px;
   cursor:pointer;
 }
 
@@ -57,52 +57,56 @@ button{
   padding:30px 15px;
 }
 
-h1{font-size:22px;margin-bottom:25px}
+h1{
+  font-size:22px;
+  margin-bottom:25px;
+}
 
+/* ===== Services ===== */
 .services{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:22px;
+  gap:24px;
 }
 
 /* ===== Card ===== */
 .card{
   background:#fff;
   color:#020617;
-  border-radius:20px;
+  border-radius:22px;
   padding:22px;
-  box-shadow:0 20px 40px rgba(0,0,0,.25);
+  box-shadow:0 20px 45px rgba(0,0,0,.3);
   animation:fadeUp .6s ease both;
   transition:.25s;
 }
 
 .card:hover{
-  transform:translateY(-8px) scale(1.02);
+  transform:translateY(-10px) scale(1.03);
 }
 
 @keyframes fadeUp{
-  from{opacity:0;transform:translateY(30px)}
+  from{opacity:0;transform:translateY(40px)}
   to{opacity:1;transform:translateY(0)}
 }
 
 .service-img{
-  width:70px;
-  height:70px;
-  border-radius:18px;
+  width:72px;
+  height:72px;
+  border-radius:20px;
   object-fit:cover;
   margin-bottom:12px;
-  box-shadow:0 10px 20px rgba(0,0,0,.3);
+  box-shadow:0 10px 25px rgba(0,0,0,.3);
 }
 
 .card h3{
-  margin:5px 0;
+  margin:6px 0;
   font-size:17px;
 }
 
 .card p{
   font-size:14px;
   color:#475569;
-  min-height:40px;
+  min-height:42px;
 }
 
 .price{
@@ -113,11 +117,11 @@ h1{font-size:22px;margin-bottom:25px}
 }
 
 .card button{
-  margin-top:15px;
+  margin-top:16px;
   width:100%;
   padding:12px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
   font-size:15px;
@@ -173,30 +177,30 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-/* ===== إضافة خدمات افتراضية إذا ما في ===== */
-function seedServices(){
-  const demo = [
-    {
-      name:"اشتراك نتفلكس",
-      desc:"حساب نتفلكس لمدة شهر",
-      price:"10",
-      image:"https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
-    },
-    {
-      name:"ChatGPT Plus",
-      desc:"اشتراك ChatGPT شهر كامل",
-      price:"20",
-      image:"https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg"
-    },
-    {
-      name:"CapCut Pro",
-      desc:"نسخة CapCut مدفوعة",
-      price:"8",
-      image:"https://static.cdnlogo.com/logos/c/23/capcut.svg"
-    }
-  ];
+/* ===== خدمات جاهزة (تنضاف مرة وحدة فقط) ===== */
+const DEFAULT_SERVICES = [
+  {
+    name:"اشتراك Netflix",
+    desc:"حساب نتفلكس لمدة شهر كامل",
+    price:"10",
+    image:"https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
+  },
+  {
+    name:"ChatGPT Plus",
+    desc:"اشتراك ChatGPT مدفوع",
+    price:"20",
+    image:"https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg"
+  },
+  {
+    name:"CapCut Pro",
+    desc:"نسخة CapCut احترافية",
+    price:"8",
+    image:"https://static.cdnlogo.com/logos/c/23/capcut.svg"
+  }
+];
 
-  demo.forEach(s=>{
+function seedServices(){
+  DEFAULT_SERVICES.forEach(s=>{
     db.collection("services").add({
       ...s,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -204,7 +208,7 @@ function seedServices(){
   });
 }
 
-/* ===== تحميل الخدمات ===== */
+/* ===== تحميل الخدمات (ما تختفي) ===== */
 db.collection("services")
 .onSnapshot(snapshot=>{
   servicesDiv.innerHTML="";
@@ -218,7 +222,7 @@ db.collection("services")
     const s = doc.data();
     servicesDiv.innerHTML += `
       <div class="card">
-        <img class="service-img" src="${s.image || 'https://via.placeholder.com/70'}">
+        <img class="service-img" src="${s.image}">
         <h3>${s.name}</h3>
         <p>${s.desc || ""}</p>
         <div class="price">${s.price} $</div>
