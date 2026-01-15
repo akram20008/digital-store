@@ -5,150 +5,146 @@
 <title>متجر الخدمات الرقمية</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-}
-
+/* ===== أساسيات ===== */
 body{
   margin:0;
-  background:#f8fafc;
-  color:#0f172a;
+  font-family:Tahoma;
+  background:linear-gradient(135deg,#020617,#1e3a8a);
+  color:#fff;
+  animation:fadeIn 1s ease;
 }
 
-/* ===== HEADER ===== */
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
 header{
-  background:#ffffff;
-  border-bottom:1px solid #e5e7eb;
-  padding:14px 22px;
+  background:rgba(2,6,23,.9);
+  backdrop-filter:blur(8px);
+  padding:15px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   position:sticky;
   top:0;
   z-index:100;
+  animation:slideDown .7s ease;
+}
+
+@keyframes slideDown{
+  from{transform:translateY(-40px);opacity:0}
+  to{transform:translateY(0);opacity:1}
 }
 
 header h2{
   margin:0;
   font-size:18px;
-  font-weight:700;
 }
 
 .header-actions{
   display:flex;
-  gap:12px;
+  gap:10px;
   align-items:center;
 }
 
 .header-actions a{
+  color:#e5e7eb;
   text-decoration:none;
   font-size:14px;
-  color:#334155;
-  padding:6px 10px;
-  border-radius:8px;
 }
 
 .header-actions a:hover{
-  background:#f1f5f9;
+  color:#38bdf8;
 }
 
-header button{
-  background:#ef4444;
+button{
+  background:#dc2626;
   border:none;
   color:#fff;
-  padding:7px 14px;
+  padding:7px 12px;
   border-radius:8px;
   cursor:pointer;
 }
 
-/* ===== CONTAINER ===== */
 .container{
-  max-width:1200px;
+  max-width:1100px;
   margin:auto;
-  padding:35px 18px;
+  padding:30px 15px;
 }
 
-.container h1{
-  text-align:center;
-  font-size:26px;
-  margin-bottom:40px;
-  color:#1e293b;
+h1{
+  font-size:22px;
+  margin-bottom:25px;
+  animation:fadeUp .8s ease;
 }
 
-/* ===== SERVICES GRID ===== */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
 .services{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:25px;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:22px;
 }
 
-/* ===== CARD ===== */
+/* ===== كروت الخدمات ===== */
 .card{
-  background:#ffffff;
+  background:#fff;
+  color:#020617;
   border-radius:18px;
   padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  transition:.25s;
-  display:flex;
-  flex-direction:column;
+  box-shadow:0 15px 35px rgba(0,0,0,.25);
+  opacity:0;
+  transform:translateY(40px);
+  animation:cardIn .6s ease forwards;
+}
+
+@keyframes cardIn{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .card:hover{
   transform:translateY(-6px);
-  box-shadow:0 18px 40px rgba(0,0,0,.12);
 }
 
 .card h3{
   margin:0 0 8px;
-  font-size:18px;
-  color:#0f172a;
+  font-size:17px;
 }
 
 .card p{
   font-size:14px;
   color:#475569;
-  line-height:1.6;
-  flex-grow:1;
+  min-height:40px;
 }
 
-/* ===== PRICE ===== */
 .price{
-  margin-top:14px;
-  font-size:20px;
-  font-weight:700;
+  margin-top:10px;
   color:#16a34a;
+  font-weight:bold;
+  font-size:18px;
 }
 
-/* ===== BUTTON ===== */
 .card button{
-  margin-top:18px;
+  margin-top:15px;
   width:100%;
-  padding:12px;
+  padding:11px;
   border:none;
-  border-radius:12px;
-  background:#2563eb;
+  border-radius:10px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
   font-size:15px;
-  font-weight:600;
-  cursor:pointer;
-  transition:.2s;
 }
 
 .card button:hover{
-  background:#1d4ed8;
+  opacity:.9;
 }
-
-/* ===== MOBILE ===== */
-@media(max-width:600px){
-  .container h1{
-    font-size:22px;
-  }
-
-  header h2{
-    font-size:16px;
-  }
-  }
 </style>
 </head>
 
@@ -185,7 +181,7 @@ const db = firebase.firestore();
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 const servicesDiv = document.getElementById("services");
 
-/* تسجيل دخول */
+/* حماية + زر الأدمن */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -200,24 +196,27 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-/* تحميل الخدمات (برا auth) */
+/* تحميل الخدمات + أنيميشن متدرج */
 db.collection("services")
 .orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
   servicesDiv.innerHTML="";
+  let delay = 0;
   snapshot.forEach(doc=>{
     const s = doc.data();
     servicesDiv.innerHTML += `
-      <div class="card">
+      <div class="card" style="animation-delay:${delay}s">
         <h3>${s.name}</h3>
         <p>${s.desc || ""}</p>
         <div class="price">${s.price} $</div>
         <button onclick="orderService('${s.name}')">اطلب الخدمة</button>
       </div>
     `;
+    delay += 0.12;
   });
 });
 
+/* طلب خدمة */
 function orderService(name){
   const user = auth.currentUser;
   if(!user) return;
@@ -232,6 +231,7 @@ function orderService(name){
   alert("✅ تم إرسال الطلب");
 }
 
+/* تسجيل خروج */
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
