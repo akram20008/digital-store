@@ -23,13 +23,25 @@ header{
 
 header h2{margin:0;font-size:18px}
 
+header .actions{
+  display:flex;
+  gap:10px;
+}
+
 header button{
-  background:#dc2626;
   border:none;
-  color:#fff;
   padding:8px 14px;
   border-radius:8px;
   cursor:pointer;
+  color:#fff;
+}
+
+.back{
+  background:#2563eb;
+}
+
+.logout{
+  background:#dc2626;
 }
 
 .container{
@@ -45,7 +57,7 @@ header button{
   padding:18px;
   margin-bottom:15px;
   box-shadow:0 15px 35px rgba(0,0,0,.25);
-  animation:slideUp .7s ease both;
+  animation:slideUp .6s ease both;
   transition:.3s;
 }
 
@@ -67,16 +79,9 @@ header button{
   background:#16a34a;
 }
 
-/* ===== Animation ===== */
 @keyframes slideUp{
-  from{
-    opacity:0;
-    transform:translateY(40px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(40px)}
+  to{opacity:1;transform:translateY(0)}
 }
 </style>
 </head>
@@ -85,7 +90,14 @@ header button{
 
 <header>
   <h2>📦 طلباتي</h2>
-  <button onclick="logout()">تسجيل خروج</button>
+  <div class="actions">
+    <button class="back" onclick="location.href='index.html'">
+      🛒 الرجوع للمتجر
+    </button>
+    <button class="logout" onclick="logout()">
+      تسجيل خروج
+    </button>
+  </div>
 </header>
 
 <div class="container" id="orders"></div>
@@ -106,7 +118,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const ordersDiv = document.getElementById("orders");
 
-/* حماية الصفحة + تحميل الطلبات */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -115,9 +126,14 @@ auth.onAuthStateChanged(user=>{
 
   db.collection("orders")
   .where("email","==",user.email)
-  .orderBy("createdAt","desc")
   .onSnapshot(snapshot=>{
     ordersDiv.innerHTML="";
+
+    if(snapshot.empty){
+      ordersDiv.innerHTML="<p>❌ لا يوجد طلبات بعد</p>";
+      return;
+    }
+
     snapshot.forEach(doc=>{
       const o = doc.data();
       ordersDiv.innerHTML += `
@@ -129,10 +145,6 @@ auth.onAuthStateChanged(user=>{
         </div>
       `;
     });
-
-    if(snapshot.empty){
-      ordersDiv.innerHTML="<p>❌ لا يوجد طلبات بعد</p>";
-    }
   });
 });
 
