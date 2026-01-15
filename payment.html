@@ -5,201 +5,83 @@
 <title>تفاصيل الدفع</title>
 
 <style>
-:root{
-  --main:#2563eb;
-  --dark:#020617;
-}
-
-*{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Tajawal,Tahoma;
-  background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-/* خلفية متحركة */
-.bg{
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at 20% 20%,#2563eb33,transparent 50%),
-    radial-gradient(circle at 80% 80%,#22c55e33,transparent 50%);
-  animation:bg 12s ease-in-out infinite alternate;
-  z-index:-1;
-}
-@keyframes bg{
-  from{transform:scale(1)}
-  to{transform:scale(1.15)}
-}
-
-/* الصندوق */
-.box{
-  width:92%;
-  max-width:460px;
-  background:rgba(2,6,23,.75);
-  backdrop-filter:blur(22px);
-  border-radius:26px;
-  padding:28px;
-  box-shadow:0 40px 100px rgba(0,0,0,.8);
-  animation:boxIn .9s cubic-bezier(.17,.89,.32,1.49);
-}
-@keyframes boxIn{
-  from{opacity:0;transform:translateY(60px) scale(.85)}
-  to{opacity:1;transform:none}
-}
-
-h2{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-/* معلومات الخدمة */
-.info{
   background:#020617;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:20px;
-  animation:fadeUp .6s ease .2s both;
-}
-
-/* خيارات الدفع */
-.pay{
+  color:#fff;
   display:flex;
+  justify-content:center;
   align-items:center;
-  gap:14px;
-  padding:16px;
-  border-radius:18px;
-  background:#111827;
-  margin-bottom:12px;
-  cursor:pointer;
-  transition:.35s;
-  animation:fadeUp .6s ease both;
+  min-height:100vh;
 }
-.pay:nth-child(1){animation-delay:.3s}
-.pay:nth-child(2){animation-delay:.4s}
-.pay:nth-child(3){animation-delay:.5s}
-.pay:nth-child(4){animation-delay:.6s}
-
-.pay:hover{
-  transform:translateY(-6px) scale(1.03);
-  background:#1e40af;
+.box{
+  width:95%;
+  max-width:420px;
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:20px;
+  padding:20px;
+}
+.pay{
+  padding:14px;
+  background:#111827;
+  border-radius:14px;
+  margin-bottom:10px;
+  cursor:pointer;
 }
 .pay.active{
-  background:linear-gradient(135deg,#16a34a,#166534);
-  box-shadow:0 0 0 2px #4ade80 inset;
+  background:#1e40af;
 }
-
-.icon{
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  background:#020617;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-}
-
-/* رفع صورة */
-.upload{
-  margin-top:16px;
-  background:#020617;
-  padding:14px;
-  border-radius:16px;
-  animation:fadeUp .6s ease .7s both;
-}
-.upload input{width:100%;color:#fff}
-
-/* زر */
 button{
   width:100%;
-  margin-top:20px;
-  padding:16px;
+  margin-top:15px;
+  padding:14px;
   border:none;
-  border-radius:20px;
-  background:linear-gradient(135deg,#2563eb,#1e40af);
+  border-radius:16px;
+  background:#2563eb;
   color:#fff;
   font-size:16px;
-  cursor:pointer;
-  transition:.35s;
-  animation:pulse 2s infinite;
 }
-button:hover{
-  transform:scale(1.06);
-}
-@keyframes pulse{
-  0%,100%{box-shadow:0 0 0 0 #2563eb66}
-  50%{box-shadow:0 0 30px 6px #2563eb66}
-}
-
-/* أنيميشن عام */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(30px)}
-  to{opacity:1;transform:none}
+input{
+  width:100%;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
-
 <div class="box">
-  <h2>💳 تفاصيل الدفع</h2>
+  <h3>تفاصيل الدفع</h3>
+  <p>الخدمة: <b id="serviceName"></b></p>
+  <p>السعر: $<b id="servicePrice"></b></p>
 
-  <div class="info">
-    📦 الخدمة: <b id="serviceName"></b><br>
-    💰 السعر: $<b id="servicePrice"></b>
-  </div>
+  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">🏦 بنك فلسطين</div>
+  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">📱 محفظة إلكترونية</div>
+  <div class="pay" onclick="selectPay(this,'PayPal')">💳 PayPal</div>
+  <div class="pay" onclick="selectPay(this,'جوال باي')">📞 جوال باي</div>
 
-  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
-    <div class="icon">🏦</div> بنك فلسطين
-  </div>
-  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
-    <div class="icon">📱</div> محفظة إلكترونية
-  </div>
-  <div class="pay" onclick="selectPay(this,'PayPal')">
-    <div class="icon">💳</div> PayPal
-  </div>
-  <div class="pay" onclick="selectPay(this,'جوال باي')">
-    <div class="icon">📞</div> جوال باي
-  </div>
-
-  <div class="upload">
-    📷 إثبات الدفع
-    <input type="file" id="proof" accept="image/*">
-  </div>
-
-  <button onclick="finish()">🚀 تأكيد الطلب</button>
+  <input type="file" id="proof" accept="image/*">
+  <button onclick="confirmOrder()">تأكيد الطلب</button>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain:"digital-store-268a9.firebaseapp.com",
-  projectId:"digital-store-268a9",
-  storageBucket:"digital-store-268a9.appspot.com"
+  projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const storage=firebase.storage();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-serviceName.textContent=localStorage.getItem("serviceName");
-servicePrice.textContent=localStorage.getItem("servicePrice");
+document.getElementById("serviceName").textContent = localStorage.getItem("serviceName");
+document.getElementById("servicePrice").textContent = localStorage.getItem("servicePrice");
 
 let paymentMethod="";
 
@@ -209,32 +91,31 @@ function selectPay(el,method){
   paymentMethod=method;
 }
 
-async function finish(){
-  const user=auth.currentUser;
+function confirmOrder(){
   const file=document.getElementById("proof").files[0];
-
-  if(!user||!paymentMethod||!file){
-    alert("❌ أكمل جميع البيانات");
+  if(!paymentMethod || !file){
+    alert("اختَر طريقة الدفع وارفع صورة");
     return;
   }
 
-  const ref=storage.ref("proofs/"+Date.now()+"_"+file.name);
-  await ref.put(file);
-  const img=await ref.getDownloadURL();
+  auth.onAuthStateChanged(user=>{
+    if(!user){
+      alert("سجل دخولك أولاً");
+      return;
+    }
 
-  await db.collection("orders").add({
-    uid:user.uid,
-    email:user.email,
-    service:serviceName.textContent,
-    price:servicePrice.textContent,
-    paymentMethod,
-    proofImage:img,
-    status:"قيد المراجعة",
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    db.collection("orders").add({
+      service: localStorage.getItem("serviceName"),
+      price: localStorage.getItem("servicePrice"),
+      paymentMethod,
+      email: user.email,
+      status:"قيد المراجعة",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      alert("تم إرسال الطلب");
+      location.href="orders.html";
+    });
   });
-
-  alert("✅ تم إرسال الطلب بنجاح");
-  location.href="orders.html";
 }
 </script>
 
