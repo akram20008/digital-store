@@ -6,7 +6,7 @@
 
 <style>
 :root{
-  --blue:#2563eb;
+  --main:#2563eb;
   --dark:#020617;
 }
 
@@ -14,21 +14,35 @@
 
 body{
   margin:0;
-  font-family:Tahoma;
-  background:
-    radial-gradient(circle at top,#1e40af,#020617 70%);
+  font-family:Tajawal,Tahoma;
   color:#fff;
-  min-height:100vh;
+  background:
+    radial-gradient(circle at top,#1e3a8a,#020617 70%);
+  background-attachment:fixed;
+  overflow-x:hidden;
 }
 
-/* ===== Header ===== */
+/* ===== PARALLAX BACKGROUND ===== */
+.parallax{
+  position:fixed;
+  inset:0;
+  background:
+    linear-gradient(120deg,rgba(37,99,235,.25),transparent 60%),
+    url("https://images.unsplash.com/photo-1535223289827-42f1e9919769");
+  background-size:cover;
+  background-position:center;
+  transform:translateZ(0);
+  z-index:-1;
+}
+
+/* ===== HEADER ===== */
 header{
   position:sticky;
   top:0;
-  z-index:100;
+  z-index:10;
   background:rgba(2,6,23,.75);
-  backdrop-filter:blur(12px);
-  padding:15px 20px;
+  backdrop-filter:blur(14px);
+  padding:14px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -38,8 +52,7 @@ header h2{margin:0;font-size:18px}
 
 .header-actions{
   display:flex;
-  gap:12px;
-  align-items:center;
+  gap:10px;
 }
 
 .header-actions a{
@@ -48,9 +61,7 @@ header h2{margin:0;font-size:18px}
   font-size:14px;
 }
 
-.header-actions a:hover{color:#38bdf8}
-
-.logout{
+button{
   background:#dc2626;
   border:none;
   color:#fff;
@@ -59,108 +70,120 @@ header h2{margin:0;font-size:18px}
   cursor:pointer;
 }
 
-/* ===== Container ===== */
+/* ===== CONTENT ===== */
 .container{
   max-width:1200px;
   margin:auto;
-  padding:40px 15px;
+  padding:50px 15px;
 }
 
 h1{
   text-align:center;
-  margin-bottom:35px;
-  font-size:24px;
+  font-size:28px;
+  margin-bottom:40px;
+  animation:titleIn 1s ease;
 }
 
-/* ===== Services Grid ===== */
+/* ===== SERVICES GRID ===== */
 .services{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:28px;
-  perspective:1200px;
+  gap:26px;
 }
 
-/* ===== Card ===== */
+/* ===== CARD ===== */
 .card{
-  background:rgba(255,255,255,.12);
-  backdrop-filter:blur(16px);
-  border-radius:22px;
+  background:linear-gradient(
+    160deg,
+    rgba(255,255,255,.18),
+    rgba(255,255,255,.06)
+  );
+  backdrop-filter:blur(18px);
+  border-radius:24px;
   padding:22px;
+  box-shadow:0 25px 60px rgba(0,0,0,.45);
   text-align:center;
-  box-shadow:0 30px 60px rgba(0,0,0,.35);
-  transform-style:preserve-3d;
 
   opacity:0;
-  transform:translateY(60px) scale(.9);
-  transition:
-    opacity .8s ease,
-    transform .8s cubic-bezier(.22,1,.36,1);
+  transform:translateY(50px) scale(.92);
+  animation:cardIn .9s ease forwards;
 }
 
-.card.show{
-  opacity:1;
-  transform:translateY(0) scale(1);
-}
-
-/* Hover Parallax */
 .card:hover{
-  transform:translateY(-10px) scale(1.03) rotateX(6deg);
+  transform:translateY(-14px) scale(1.04);
+  box-shadow:0 40px 90px rgba(0,0,0,.65);
 }
 
-/* Image */
+/* ===== IMAGE ===== */
 .card img{
-  width:90px;
-  height:90px;
+  width:70px;
+  height:70px;
   object-fit:contain;
-  border-radius:50%;
-  background:#fff;
-  padding:10px;
-  box-shadow:0 12px 30px rgba(0,0,0,.4);
-  margin-bottom:15px;
+  margin-bottom:14px;
+  animation:float 4s ease-in-out infinite;
 }
 
-/* Text */
+/* ===== TEXT ===== */
 .card h3{
-  margin:10px 0 6px;
-  font-size:17px;
+  margin:0 0 8px;
+  font-size:18px;
 }
 
 .card p{
   font-size:14px;
   color:#e5e7eb;
-  min-height:40px;
+  min-height:38px;
 }
 
 .price{
-  margin:12px 0;
-  font-size:18px;
+  margin-top:12px;
+  font-size:20px;
   font-weight:bold;
-  color:#22c55e;
+  color:#4ade80;
 }
 
-/* Button */
+/* ===== BUTTON ===== */
 .card button{
   width:100%;
+  margin-top:18px;
   padding:12px;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
-  color:#fff;
+  border-radius:14px;
   background:linear-gradient(135deg,#2563eb,#1e40af);
-  cursor:pointer;
+  font-size:15px;
+  transition:.3s;
 }
 
-.card button:hover{opacity:.9}
+.card button:hover{
+  transform:scale(1.07);
+  box-shadow:0 0 30px rgba(37,99,235,.8);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes cardIn{
+  to{opacity:1;transform:none}
+}
+
+@keyframes titleIn{
+  from{opacity:0;transform:translateY(-25px)}
+  to{opacity:1;transform:none}
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
 </style>
 </head>
 
 <body>
 
+<div class="parallax" id="parallax"></div>
+
 <header>
   <h2>🛒 متجر الخدمات الرقمية</h2>
   <div class="header-actions" id="headerActions">
     <a href="orders.html">📦 طلباتي</a>
-    <button class="logout" onclick="logout()">تسجيل خروج</button>
+    <button onclick="logout()">تسجيل خروج</button>
   </div>
 </header>
 
@@ -176,21 +199,19 @@ h1{
 
 <script>
 firebase.initializeApp({
-  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
-  authDomain:"digital-store-268a9.firebaseapp.com",
-  projectId:"digital-store-268a9"
+  apiKey: "AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain: "digital-store-268a9.firebaseapp.com",
+  projectId: "digital-store-268a9"
 });
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-const ADMINS = ["admin@admin.com","admin2@admin.com"];
 const servicesDiv = document.getElementById("services");
+const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
-/* Auth */
+/* ===== AUTH ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){ location.href="login.html"; return; }
-
   if(ADMINS.includes(user.email)){
     const a=document.createElement("a");
     a.href="admin.html";
@@ -199,51 +220,56 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-/* Load services + STRONG animation */
+/* ===== SMART SORT + LOAD ===== */
 db.collection("services")
 .orderBy("createdAt","desc")
-.onSnapshot(snapshot=>{
+.onSnapshot(snap=>{
+  let data=[];
+  snap.forEach(d=>data.push(d.data()));
+
+  data.sort((a,b)=>{
+    if(b.price && a.price) return b.price - a.price;
+    if(b.price) return 1;
+    if(a.price) return -1;
+    return 0;
+  });
+
   servicesDiv.innerHTML="";
-  let delay=0;
-
-  snapshot.forEach(doc=>{
-    const s=doc.data();
-
-    const card=document.createElement("div");
-    card.className="card";
-
-    card.innerHTML=`
-      <img src="${s.image || 'https://cdn-icons-png.flaticon.com/512/565/565547.png'}">
-      <h3>${s.name}</h3>
-      <p>${s.desc || ""}</p>
-      <div class="price">$ ${s.price}</div>
-      <button onclick="orderService('${s.name}')">اطلب الخدمة</button>
-    `;
-
-    servicesDiv.appendChild(card);
-
-    setTimeout(()=>card.classList.add("show"), delay);
-    delay += 150; // stagger animation
+  data.forEach((s,i)=>{
+    servicesDiv.innerHTML+=`
+      <div class="card" style="animation-delay:${i*.12}s">
+        <img src="${s.image || 'https://upload.wikimedia.org/wikipedia/commons/7/75/Netflix_icon.svg'}">
+        <h3>${s.name}</h3>
+        <p>${s.desc || ""}</p>
+        <div class="price">$ ${s.price}</div>
+        <button onclick="orderService('${s.name}')">اطلب الخدمة</button>
+      </div>`;
   });
 });
 
+/* ===== ORDER ===== */
 function orderService(name){
-  const user=auth.currentUser;
-  if(!user)return;
-
+  const u=auth.currentUser;
+  if(!u) return;
   db.collection("orders").add({
     service:name,
-    email:user.email,
+    email:u.email,
     status:"جديد",
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
-
   alert("✅ تم إرسال الطلب");
 }
 
+/* ===== LOGOUT ===== */
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
+
+/* ===== PARALLAX EFFECT ===== */
+window.addEventListener("scroll",()=>{
+  document.getElementById("parallax").style.transform =
+    `translateY(${window.scrollY * .25}px)`;
+});
 </script>
 
 </body>
