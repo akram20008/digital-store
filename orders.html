@@ -12,47 +12,43 @@ body{
   color:#fff;
 }
 header{
-  padding:15px 20px;
+  padding:16px 20px;
   background:#020617;
   display:flex;
   justify-content:space-between;
   align-items:center;
-}
-header a{
-  color:#38bdf8;
-  text-decoration:none;
+  border-bottom:1px solid #1e293b;
 }
 .container{
   max-width:900px;
   margin:auto;
-  padding:30px 15px;
+  padding:20px;
 }
-.order{
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(14px);
+.card{
+  background:#020617;
+  border:1px solid #1e293b;
   border-radius:18px;
-  padding:18px;
-  margin-bottom:20px;
-  box-shadow:0 20px 40px rgba(0,0,0,.4);
-  animation:fadeUp .6s ease;
+  padding:16px;
+  margin-bottom:16px;
+  animation:fade .6s ease;
 }
-.order h3{margin:0 0 10px}
-.order p{margin:6px 0;color:#e5e7eb}
-.status{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:13px;
-  background:#f59e0b;
-  color:#000;
-}
-.order img{
-  width:120px;
-  border-radius:12px;
-  margin-top:12px;
-}
-@keyframes fadeUp{
+@keyframes fade{
   from{opacity:0;transform:translateY(20px)}
+}
+.card img{
+  width:100%;
+  max-height:200px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-top:10px;
+}
+.status{
+  margin-top:8px;
+  color:#4ade80;
+}
+.back{
+  color:#93c5fd;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -60,13 +56,12 @@ header a{
 <body>
 
 <header>
-  <h2>📦 طلباتي</h2>
-  <a href="index.html">⬅️ الرجوع للمتجر</a>
+  <div class="back" onclick="location.href='index.html'">⬅ المتجر</div>
+  <h3>📦 طلباتي</h3>
 </header>
 
 <div class="container" id="orders"></div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -80,7 +75,7 @@ firebase.initializeApp({
 
 const auth=firebase.auth();
 const db=firebase.firestore();
-const ordersDiv=document.getElementById("orders");
+const box=document.getElementById("orders");
 
 auth.onAuthStateChanged(user=>{
   if(!user){
@@ -89,35 +84,30 @@ auth.onAuthStateChanged(user=>{
   }
 
   db.collection("orders")
-  .where("email","==",user.email)
-  .orderBy("createdAt","desc")
-  .onSnapshot(snapshot=>{
-    ordersDiv.innerHTML="";
-    if(snapshot.empty){
-      ordersDiv.innerHTML="<p>لا يوجد طلبات بعد</p>";
-      return;
-    }
+    .where("email","==",user.email)
+    .orderBy("createdAt","desc")
+    .onSnapshot(snap=>{
+      box.innerHTML="";
+      if(snap.empty){
+        box.innerHTML="<p>❌ لا يوجد طلبات</p>";
+        return;
+      }
 
-    snapshot.forEach(doc=>{
-      const o=doc.data();
-      ordersDiv.innerHTML+=`
-        <div class="order">
-          <h3>${o.service || "خدمة غير معروفة"}</h3>
-          <p>💰 السعر: ${o.price || "—"}</p>
-          <p>💳 طريقة الدفع: ${o.paymentMethod || "لم يتم التحديد"}</p>
-          <span class="status">${o.status || "قيد المعالجة"}</span>
-
-          ${
-            o.proofImage
-            ? `<img src="${o.proofImage}">`
-            : `<p>📷 لا يوجد صورة إثبات</p>`
-          }
-        </div>
-      `;
+      snap.forEach(doc=>{
+        const o=doc.data();
+        box.innerHTML+=`
+          <div class="card">
+            <b>📦 ${o.service}</b><br>
+            💰 السعر: $${o.price}<br>
+            💳 الدفع: ${o.paymentMethod}<br>
+            <div class="status">📌 ${o.status}</div>
+            ${o.proofImage ? `<img src="${o.proofImage}">` : ""}
+          </div>
+        `;
+      });
     });
-  });
 });
 </script>
 
 </body>
-  </html>
+</html>
