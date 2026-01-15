@@ -181,6 +181,26 @@ h1{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-8px)}
 }
+
+/* ===== NOTIFICATION ===== */
+.notify{
+  position:fixed;
+  bottom:25px;
+  right:25px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  padding:16px 22px;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  opacity:0;
+  transform:translateY(40px) scale(.9);
+  transition:.5s;
+  z-index:9999;
+}
+
+.notify.show{
+  opacity:1;
+  transform:none;
+}
 </style>
 </head>
 
@@ -201,6 +221,12 @@ h1{
   <div class="services" id="services"></div>
 </div>
 
+<!-- Notification -->
+<div id="notify" class="notify"></div>
+<audio id="notifySound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3">
+</audio>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -216,6 +242,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 const servicesDiv = document.getElementById("services");
+const notify = document.getElementById("notify");
+const sound = document.getElementById("notifySound");
+
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
 auth.onAuthStateChanged(user=>{
@@ -249,13 +278,18 @@ db.collection("services")
 function orderService(name){
   const u=auth.currentUser;
   if(!u) return;
+
   db.collection("orders").add({
     service:name,
     email:u.email,
     status:"جديد",
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
-  alert("✅ تم إرسال الطلب");
+
+  sound.play();
+  notify.textContent="✅ تم إرسال الطلب بنجاح";
+  notify.classList.add("show");
+  setTimeout(()=>notify.classList.remove("show"),3000);
 }
 
 function logout(){
@@ -264,4 +298,4 @@ function logout(){
 </script>
 
 </body>
-</html>
+  </html>
