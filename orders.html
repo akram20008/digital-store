@@ -11,102 +11,60 @@ body{
   background:#020617;
   color:#fff;
 }
-
-.container{
-  max-width:900px;
-  margin:40px auto;
-  padding:20px;
-}
-
-.top-bar{
+header{
+  padding:15px 20px;
+  background:#020617;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:25px;
 }
-
-.back-btn{
-  background:linear-gradient(135deg,#2563eb,#1e40af);
-  border:none;
-  color:#fff;
-  padding:10px 16px;
-  border-radius:14px;
-  cursor:pointer;
-  font-size:14px;
-  transition:.3s;
+header a{
+  color:#38bdf8;
+  text-decoration:none;
 }
-
-.back-btn:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 25px rgba(37,99,235,.7);
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:30px 15px;
 }
-
-h2{
-  text-align:center;
-  margin:0;
-}
-
-.orders{
-  display:grid;
-  gap:20px;
-}
-
 .order{
-  background:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.05));
-  backdrop-filter:blur(18px);
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(14px);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,.4);
   animation:fadeUp .6s ease;
 }
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(30px)}
-  to{opacity:1;transform:none}
-}
-
-.order div{
-  margin:6px 0;
-  font-size:14px;
-}
-
+.order h3{margin:0 0 10px}
+.order p{margin:6px 0;color:#e5e7eb}
 .status{
   display:inline-block;
   padding:6px 12px;
-  border-radius:12px;
+  border-radius:20px;
   font-size:13px;
-  margin-top:8px;
+  background:#f59e0b;
+  color:#000;
 }
-
-.pending{background:#facc15;color:#000}
-.review{background:#38bdf8;color:#000}
-.done{background:#22c55e;color:#000}
-.rejected{background:#dc2626}
-
 .order img{
   width:120px;
   border-radius:12px;
   margin-top:12px;
-  display:block;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+  <h2>📦 طلباتي</h2>
+  <a href="index.html">⬅️ الرجوع للمتجر</a>
+</header>
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <button class="back-btn" onclick="location.href='index.html'">
-      🛒 الرجوع للمتجر
-    </button>
-    <h2>📦 طلباتي</h2>
-    <div></div>
-  </div>
-
-  <div class="orders" id="orders"></div>
-</div>
+<div class="container" id="orders"></div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -120,9 +78,9 @@ firebase.initializeApp({
   projectId:"digital-store-268a9"
 });
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-const ordersDiv = document.getElementById("orders");
+const auth=firebase.auth();
+const db=firebase.firestore();
+const ordersDiv=document.getElementById("orders");
 
 auth.onAuthStateChanged(user=>{
   if(!user){
@@ -131,32 +89,33 @@ auth.onAuthStateChanged(user=>{
   }
 
   db.collection("orders")
-    .where("email","==",user.email)
-    .orderBy("createdAt","desc")
-    .onSnapshot(snap=>{
-      ordersDiv.innerHTML="";
-      if(snap.empty){
-        ordersDiv.innerHTML="<p style='text-align:center'>لا يوجد طلبات بعد</p>";
-      }
-      snap.forEach(doc=>{
-        const o = doc.data();
+  .where("email","==",user.email)
+  .orderBy("createdAt","desc")
+  .onSnapshot(snapshot=>{
+    ordersDiv.innerHTML="";
+    if(snapshot.empty){
+      ordersDiv.innerHTML="<p>لا يوجد طلبات بعد</p>";
+      return;
+    }
 
-        let statusClass="pending";
-        if(o.status==="قيد المراجعة") statusClass="review";
-        if(o.status==="مكتمل") statusClass="done";
-        if(o.status==="مرفوض") statusClass="rejected";
+    snapshot.forEach(doc=>{
+      const o=doc.data();
+      ordersDiv.innerHTML+=`
+        <div class="order">
+          <h3>${o.service || "خدمة غير معروفة"}</h3>
+          <p>💰 السعر: ${o.price || "—"}</p>
+          <p>💳 طريقة الدفع: ${o.paymentMethod || "لم يتم التحديد"}</p>
+          <span class="status">${o.status || "قيد المعالجة"}</span>
 
-        ordersDiv.innerHTML+=`
-          <div class="order">
-            <div>🛒 الخدمة: <b>${o.service}</b></div>
-            <div>💰 السعر: $ ${o.price}</div>
-            <div>💳 طريقة الدفع: ${o.paymentMethod}</div>
-            <div class="status ${statusClass}">${o.status}</div>
-            ${o.proofImage ? `<img src="${o.proofImage}">` : ""}
-          </div>
-        `;
-      });
+          ${
+            o.proofImage
+            ? `<img src="${o.proofImage}">`
+            : `<p>📷 لا يوجد صورة إثبات</p>`
+          }
+        </div>
+      `;
     });
+  });
 });
 </script>
 
