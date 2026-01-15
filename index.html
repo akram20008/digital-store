@@ -155,10 +155,50 @@ h1{
   transition:.5s;
   z-index:9999;
 }
+.notify.show{opacity:1;transform:none}
 
-.notify.show{
+/* ===== PAYMENT MODAL (ADDITION) ===== */
+.payment-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.4s;
+  z-index:99999;
+}
+.payment-modal.show{
   opacity:1;
-  transform:none;
+  pointer-events:auto;
+}
+.payment-box{
+  background:#020617;
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:420px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7);
+  animation:pop .4s ease;
+}
+@keyframes pop{
+  from{transform:scale(.8);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.payment-box h3{text-align:center;margin-bottom:20px}
+.pay-option{
+  background:#111827;
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:12px;
+  cursor:pointer;
+  text-align:center;
+  transition:.3s;
+}
+.pay-option:hover{
+  background:#1e40af;
 }
 </style>
 </head>
@@ -182,9 +222,15 @@ h1{
 </div>
 
 <div id="notify" class="notify"></div>
-<audio id="notifySound" preload="auto">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3">
-</audio>
+
+<!-- ===== PAYMENT MODAL ===== -->
+<div id="paymentModal" class="payment-modal">
+  <div class="payment-box">
+    <h3>💳 اختر طريقة الدفع</h3>
+    <div class="pay-option" onclick="confirmPayment('بنك فلسطين')">🏦 بنك فلسطين</div>
+    <div class="pay-option" onclick="confirmPayment('محفظة إلكترونية')">📱 محفظة إلكترونية</div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -201,19 +247,9 @@ const auth=firebase.auth();
 const db=firebase.firestore();
 const servicesDiv=document.getElementById("services");
 const notify=document.getElementById("notify");
-const sound=document.getElementById("notifySound");
 const ADMINS=["admin@admin.com","admin2@admin.com"];
 
-auth.onAuthStateChanged(user=>{
-  if(!user){location.href="login.html";return;}
-  if(ADMINS.includes(user.email) && !document.getElementById("adminBtn")){
-    const a=document.createElement("a");
-    a.id="adminBtn";
-    a.href="admin.html";
-    a.textContent="🔐 لوحة الأدمن";
-    headerActions.prepend(a);
-  }
-});
+let selectedService=null;
 
 db.collection("services").orderBy("createdAt","desc").onSnapshot(snap=>{
   servicesDiv.innerHTML="";
@@ -222,7 +258,7 @@ db.collection("services").orderBy("createdAt","desc").onSnapshot(snap=>{
     const s=doc.data();
     servicesDiv.innerHTML+=`
       <div class="card" style="animation-delay:${i++*.12}s">
-        <img src="${s.image || 'https://cdn-icons-png.flaticon.com/512/5968/5968520.png'}">
+        <img src="${s.image}">
         <h3>${s.name}</h3>
         <p>${s.desc||""}</p>
         <div class="price">$ ${s.price}</div>
@@ -231,20 +267,26 @@ db.collection("services").orderBy("createdAt","desc").onSnapshot(snap=>{
   });
 });
 
+/* ===== ORDER FLOW ===== */
 function orderService(name){
+  selectedService=name;
+  document.getElementById("paymentModal").classList.add("show");
+}
+
+function confirmPayment(method){
   const u=auth.currentUser;
   if(!u) return;
 
   db.collection("orders").add({
-    service:name,
+    service:selectedService,
     email:u.email,
-    status:"جديد",
+    paymentMethod:method,
+    status:"بانتظار الدفع",
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  sound.currentTime=0;
-  sound.play().catch(()=>{});
-  notify.textContent="✅ تم إرسال الطلب بنجاح";
+  document.getElementById("paymentModal").classList.remove("show");
+  notify.textContent="✅ تم إنشاء الطلب، بانتظار الدفع";
   notify.classList.add("show");
   setTimeout(()=>notify.classList.remove("show"),3000);
 }
@@ -255,4 +297,4 @@ function logout(){
 </script>
 
 </body>
-    </html>
+  </html>
