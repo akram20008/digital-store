@@ -18,7 +18,6 @@ header{
   justify-content:space-between;
   align-items:center;
 }
-header h2{margin:0;font-size:20px}
 .header-actions{
   display:flex;
   gap:12px;
@@ -27,9 +26,8 @@ header h2{margin:0;font-size:20px}
 .header-actions a{
   color:#fff;
   text-decoration:none;
-  font-size:15px;
 }
-header button{
+button{
   background:#dc2626;
   border:none;
   color:#fff;
@@ -52,26 +50,10 @@ header button{
   color:#000;
   border-radius:14px;
   padding:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
-.card h3{margin-top:0}
 .price{
   color:#16a34a;
   font-weight:bold;
-  font-size:18px;
-}
-.card button{
-  margin-top:10px;
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  background:#1e40af;
-  color:#fff;
-  cursor:pointer;
-}
-.card button:hover{
-  background:#1e3a8a;
 }
 </style>
 </head>
@@ -107,7 +89,9 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const ADMINS = ["admin@admin.com","admin2@admin.com"];
+const servicesDiv = document.getElementById("services");
 
+/* تسجيل دخول */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -115,54 +99,47 @@ auth.onAuthStateChanged(user=>{
   }
 
   if(ADMINS.includes(user.email)){
-    const adminBtn = document.createElement("a");
-    adminBtn.href = "admin.html";
-    adminBtn.textContent = "🔐 لوحة الأدمن";
-    document.getElementById("headerActions").prepend(adminBtn);
+    const a = document.createElement("a");
+    a.href="admin.html";
+    a.textContent="🔐 لوحة الأدمن";
+    document.getElementById("headerActions").prepend(a);
   }
 });
 
-function logout(){
-  auth.signOut().then(()=>location.href="login.html");
-}
-
-auth.onAuthStateChanged(user=>{
-  if(!user){
-    location.href="login.html";
-    return;
-  }
-
-  db.collection("services")
-  .onSnapshot(snapshot=>{
-    services.innerHTML="";
-    snapshot.forEach(doc=>{
-      const s = doc.data();
-      services.innerHTML += `
-        <div class="card">
-          <h3>${s.name}</h3>
-          <p>${s.desc || ""}</p>
-          <div class="price">${s.price} $</div>
-          <button onclick="orderService('${s.name}')">
-            اطلب الخدمة
-          </button>
-        </div>
-      `;
-    });
+/* تحميل الخدمات (برا auth) */
+db.collection("services")
+.orderBy("createdAt","desc")
+.onSnapshot(snapshot=>{
+  servicesDiv.innerHTML="";
+  snapshot.forEach(doc=>{
+    const s = doc.data();
+    servicesDiv.innerHTML += `
+      <div class="card">
+        <h3>${s.name}</h3>
+        <p>${s.desc || ""}</p>
+        <div class="price">${s.price} $</div>
+        <button onclick="orderService('${s.name}')">اطلب الخدمة</button>
+      </div>
+    `;
   });
 });
 
-function orderService(serviceName){
+function orderService(name){
   const user = auth.currentUser;
   if(!user) return;
 
   db.collection("orders").add({
-    service: serviceName,
+    service: name,
     email: user.email,
     status: "جديد",
-    createdAt: new Date()
-  }).then(()=>{
-    alert("✅ تم إرسال الطلب");
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
+
+  alert("✅ تم إرسال الطلب");
+}
+
+function logout(){
+  auth.signOut().then(()=>location.href="login.html");
 }
 </script>
 
