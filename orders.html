@@ -30,17 +30,13 @@ header{
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  animation:fade .6s ease;
-}
-@keyframes fade{
-  from{opacity:0;transform:translateY(20px)}
 }
 .card img{
   width:100%;
-  max-height:200px;
+  max-height:220px;
   object-fit:cover;
   border-radius:12px;
-  margin-top:10px;
+  margin-top:12px;
 }
 .status{
   margin-top:8px;
@@ -73,9 +69,9 @@ firebase.initializeApp({
   projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const box=document.getElementById("orders");
+const auth = firebase.auth();
+const db = firebase.firestore();
+const box = document.getElementById("orders");
 
 auth.onAuthStateChanged(user=>{
   if(!user){
@@ -83,24 +79,25 @@ auth.onAuthStateChanged(user=>{
     return;
   }
 
+  // ❗ بدون orderBy عشان ما يطلب Index
   db.collection("orders")
     .where("email","==",user.email)
-    .orderBy("createdAt","desc")
     .onSnapshot(snap=>{
       box.innerHTML="";
+
       if(snap.empty){
-        box.innerHTML="<p>❌ لا يوجد طلبات</p>";
+        box.innerHTML="<p>❌ لا يوجد طلبات بعد</p>";
         return;
       }
 
       snap.forEach(doc=>{
-        const o=doc.data();
-        box.innerHTML+=`
+        const o = doc.data();
+        box.innerHTML += `
           <div class="card">
             <b>📦 ${o.service}</b><br>
             💰 السعر: $${o.price}<br>
-            💳 الدفع: ${o.paymentMethod}<br>
-            <div class="status">📌 ${o.status}</div>
+            💳 طريقة الدفع: ${o.paymentMethod}<br>
+            <div class="status">📌 ${o.status || "قيد المراجعة"}</div>
             ${o.proofImage ? `<img src="${o.proofImage}">` : ""}
           </div>
         `;
