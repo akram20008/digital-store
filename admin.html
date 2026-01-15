@@ -2,91 +2,159 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة الأدمن</title>
+<title>لوحة تحكم الأدمن</title>
 
 <style>
 body{
   margin:0;
-  font-family:Tahoma;
-  background:#0f172a;
+  font-family:Tahom,a;
+  background:linear-gradient(135deg,#020617,#1e3a8a);
   color:#fff;
 }
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
-}
-.top-actions{
+
+/* Header */
+header{
+  background:rgba(2,6,23,.95);
+  backdrop-filter:blur(10px);
+  padding:15px 20px;
   display:flex;
-  gap:10px;
-  margin-bottom:20px;
+  justify-content:space-between;
+  align-items:center;
 }
-.box{
+
+header h2{
+  margin:0;
+  font-size:18px;
+}
+
+/* Container */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:25px 15px;
+  animation:fadeInUp 1s ease;
+}
+
+/* Cards */
+.card{
   background:#fff;
-  color:#000;
+  color:#020617;
+  border-radius:18px;
   padding:20px;
-  border-radius:14px;
-  margin-bottom:20px;
+  margin-bottom:25px;
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+  animation:scaleIn .6s ease;
 }
-h2{margin-top:0}
-input,textarea,button,select{
+
+/* Inputs */
+input{
   width:100%;
-  padding:10px;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  font-size:14px;
+}
+
+/* Buttons */
+button{
+  padding:12px;
+  width:100%;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 10px 25px rgba(37,99,235,.5);
+}
+
+.delete{
+  background:#dc2626;
+}
+
+.delete:hover{
+  box-shadow:0 10px 25px rgba(220,38,38,.6);
+}
+
+/* Services Grid */
+.services{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+/* Service Card */
+.service-card{
+  background:#f8fafc;
+  border-radius:16px;
+  padding:15px;
+  text-align:center;
+  animation:fadeInUp .8s ease;
+  transition:.3s;
+}
+
+.service-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 15px 35px rgba(0,0,0,.2);
+}
+
+.service-card img{
+  width:70px;
+  height:70px;
+  object-fit:contain;
   margin-bottom:10px;
 }
-button{
-  background:#1e40af;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
+
+.price{
+  color:#16a34a;
+  font-weight:bold;
+  margin:8px 0;
 }
-.logout{background:#dc2626}
-.go-store{background:#16a34a}
-.service{
-  border-bottom:1px solid #ddd;
-  padding:10px 0;
+
+/* Animations */
+@keyframes fadeInUp{
+  from{opacity:0; transform:translateY(30px);}
+  to{opacity:1; transform:translateY(0);}
 }
-.service img{
-  width:70px;
-  border-radius:10px;
-  display:block;
-  margin:6px 0;
+
+@keyframes scaleIn{
+  from{opacity:0; transform:scale(.9);}
+  to{opacity:1; transform:scale(1);}
 }
 </style>
 </head>
 
 <body>
 
+<header>
+  <h2>🔐 لوحة تحكم الأدمن</h2>
+  <button onclick="logout()" style="width:auto;background:#dc2626">تسجيل خروج</button>
+</header>
+
 <div class="container">
-<h1>لوحة تحكم الأدمن 🔐</h1>
 
-<div class="top-actions">
-  <button class="go-store" onclick="location.href='index.html'">🛒 المتجر</button>
-  <button class="logout" onclick="logout()">تسجيل خروج</button>
-</div>
+  <!-- Add Service -->
+  <div class="card">
+    <h3>➕ إضافة خدمة</h3>
+    <input id="name" placeholder="اسم الخدمة">
+    <input id="desc" placeholder="وصف الخدمة">
+    <input id="price" placeholder="السعر">
+    <input id="image" placeholder="رابط صورة الخدمة">
+    <button onclick="addService()">إضافة الخدمة</button>
+  </div>
 
-<!-- إضافة خدمة -->
-<div class="box">
-<h2>➕ إضافة خدمة</h2>
-<input id="serviceName" placeholder="اسم الخدمة">
-<textarea id="serviceDesc" placeholder="وصف الخدمة"></textarea>
-<input id="servicePrice" type="number" placeholder="السعر">
-<input id="serviceImage" placeholder="رابط صورة الخدمة (URL)">
-<button onclick="addService()">إضافة الخدمة</button>
-</div>
+  <!-- Services -->
+  <div class="card">
+    <h3>🛒 الخدمات</h3>
+    <div class="services" id="services"></div>
+  </div>
 
-<!-- الخدمات -->
-<div class="box">
-<h2>🛒 الخدمات</h2>
-<div id="services"></div>
-</div>
-
-<!-- الطلبات -->
-<div class="box">
-<h2>📦 الطلبات</h2>
-<div id="orders"></div>
-</div>
 </div>
 
 <!-- Firebase -->
@@ -103,85 +171,55 @@ firebase.initializeApp({
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+const servicesDiv = document.getElementById("services");
 
-const ADMINS = ["admin@admin.com","admin2@admin.com"];
-
-// حماية الأدمن
+/* Auth */
 auth.onAuthStateChanged(user=>{
-  if(!user) return location.href="login.html";
-  if(!ADMINS.includes(user.email)) location.href="index.html";
+  if(!user) location.href="login.html";
 });
 
-// تسجيل خروج
-function logout(){
-  auth.signOut().then(()=>location.href="login.html");
-}
-
-// إضافة خدمة
+/* Add Service */
 function addService(){
-  const name = serviceName.value.trim();
-  const desc = serviceDesc.value.trim();
-  const price = servicePrice.value.trim();
-  const image = serviceImage.value.trim();
-
-  if(!name || !price){
-    alert("أدخل البيانات كاملة");
-    return;
-  }
-
   db.collection("services").add({
-    name,
-    desc,
-    price,
-    image,
+    name: name.value,
+    desc: desc.value,
+    price: price.value,
+    image: image.value || "https://cdn-icons-png.flaticon.com/512/565/565547.png",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  serviceName.value="";
-  serviceDesc.value="";
-  servicePrice.value="";
-  serviceImage.value="";
+  name.value = desc.value = price.value = image.value = "";
 }
 
-// عرض الخدمات
-db.collection("services")
-.orderBy("createdAt","desc")
+/* Load Services */
+db.collection("services").orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
-  services.innerHTML="";
+  servicesDiv.innerHTML="";
   snapshot.forEach(doc=>{
     const s = doc.data();
-    services.innerHTML += `
-      <div class="service">
-        <b>${s.name}</b>
-        ${s.image ? `<img src="${s.image}">` : ""}
-        <div>${s.desc || ""}</div>
-        💰 ${s.price}
+    servicesDiv.innerHTML += `
+      <div class="service-card">
+        <img src="${s.image}">
+        <h4>${s.name}</h4>
+        <div class="price">$ ${s.price}</div>
+        <button class="delete" onclick="deleteService('${doc.id}')">🗑️ حذف</button>
       </div>
     `;
   });
 });
 
-// عرض الطلبات
-db.collection("orders")
-.orderBy("createdAt","desc")
-.onSnapshot(snapshot=>{
-  orders.innerHTML="";
-  snapshot.forEach(doc=>{
-    const o = doc.data();
-    orders.innerHTML += `
-      <div class="service">
-        <b>${o.service}</b><br>
-        ${o.email}<br>
-        الحالة:
-        <select onchange="db.collection('orders').doc('${doc.id}').update({status:this.value})">
-          <option ${o.status==="جديد"?"selected":""}>جديد</option>
-          <option ${o.status==="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
-        </select>
-      </div>
-    `;
-  });
-});
+/* Delete */
+function deleteService(id){
+  if(confirm("حذف الخدمة؟")){
+    db.collection("services").doc(id).delete();
+  }
+}
+
+/* Logout */
+function logout(){
+  auth.signOut().then(()=>location.href="login.html");
+}
 </script>
 
 </body>
-</html>
+      </html>
