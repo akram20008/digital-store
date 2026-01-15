@@ -10,6 +10,7 @@
   --bg:#020617;
 }
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Tajawal,Tahoma;
@@ -19,20 +20,9 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
 }
-.bg{
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at top right,#2563eb33,transparent 60%),
-    radial-gradient(circle at bottom left,#22c55e33,transparent 60%);
-  animation:bgMove 10s ease-in-out infinite alternate;
-  z-index:-1;
-}
-@keyframes bgMove{
-  to{transform:scale(1.08)}
-}
+
+/* BOX */
 .box{
   width:92%;
   max-width:440px;
@@ -41,42 +31,38 @@ body{
   border-radius:24px;
   padding:26px;
   box-shadow:0 30px 80px rgba(0,0,0,.7);
-  animation:boxIn .7s ease;
 }
-@keyframes boxIn{
-  from{opacity:0;transform:translateY(40px) scale(.9)}
-}
+
 h2{text-align:center;margin-bottom:20px}
+
 .info{
   background:#020617;
   border-radius:14px;
   padding:14px;
   margin-bottom:18px;
 }
-.payments{display:grid;gap:12px}
+
+/* PAYMENTS */
 .pay{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  background:#111827;
   padding:14px;
   border-radius:16px;
-  background:#111827;
+  margin-bottom:12px;
   cursor:pointer;
   transition:.3s;
 }
-.pay:hover{background:#1e40af}
-.pay.active{background:#022c22;border:1px solid #4ade80}
-.icon{
-  width:42px;height:42px;
-  display:flex;align-items:center;justify-content:center;
-  background:#020617;border-radius:12px;
+.pay.active{
+  background:#1e40af;
+  border:1px solid #4ade80;
 }
+
 .upload{
   margin-top:15px;
   background:#020617;
   border-radius:14px;
   padding:14px;
 }
+
 button{
   width:100%;
   margin-top:20px;
@@ -88,18 +74,10 @@ button{
   font-size:16px;
   cursor:pointer;
 }
-.back{
-  margin-top:10px;
-  text-align:center;
-  cursor:pointer;
-  color:#93c5fd;
-}
 </style>
 </head>
 
 <body>
-
-<div class="bg"></div>
 
 <div class="box">
   <h2>💳 تفاصيل الدفع</h2>
@@ -109,90 +87,71 @@ button{
     💰 السعر: <b>$<span id="servicePrice"></span></b>
   </div>
 
-  <div class="payments">
-    <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
-      <div class="icon">🏦</div> بنك فلسطين
-    </div>
-    <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
-      <div class="icon">📱</div> محفظة إلكترونية
-    </div>
-    <div class="pay" onclick="selectPay(this,'PayPal')">
-      <div class="icon">💳</div> PayPal
-    </div>
-    <div class="pay" onclick="selectPay(this,'جوال باي')">
-      <div class="icon">📞</div> جوال باي
-    </div>
-  </div>
+  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">🏦 بنك فلسطين</div>
+  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">📱 محفظة إلكترونية</div>
+  <div class="pay" onclick="selectPay(this,'PayPal')">💳 PayPal</div>
+  <div class="pay" onclick="selectPay(this,'جوال باي')">📞 جوال باي</div>
 
   <div class="upload">
-    📷 رفع صورة إثبات الدفع
-    <input type="file" id="proof" accept="image/*">
+    📷 صورة إثبات الدفع
+    <input type="file" id="proof">
   </div>
 
   <button onclick="finish()">تأكيد الطلب</button>
-  <div class="back" onclick="location.href='index.html'">⬅ الرجوع للمتجر</div>
 </div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain:"digital-store-268a9.firebaseapp.com",
-  projectId:"digital-store-268a9",
-  storageBucket:"digital-store-268a9.appspot.com"
+  projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const storage=firebase.storage();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 document.getElementById("serviceName").textContent =
   localStorage.getItem("serviceName");
+
 document.getElementById("servicePrice").textContent =
   localStorage.getItem("servicePrice");
 
-let paymentMethod="";
-let proofFile=null;
-
-document.getElementById("proof").onchange=e=>{
-  proofFile=e.target.files[0];
-};
+let paymentMethod = "";
 
 function selectPay(el,method){
   document.querySelectorAll(".pay")
     .forEach(p=>p.classList.remove("active"));
   el.classList.add("active");
-  paymentMethod=method;
+  paymentMethod = method;
 }
 
-async function finish(){
-  const user=auth.currentUser;
-  if(!user || !paymentMethod || !proofFile){
-    alert("❗ أكمل جميع البيانات");
+function finish(){
+  const user = auth.currentUser;
+  if(!user){
+    alert("يجب تسجيل الدخول");
+    return;
+  }
+  if(!paymentMethod){
+    alert("اختر طريقة الدفع");
     return;
   }
 
-  const ref=storage.ref("proofs/"+Date.now()+"_"+proofFile.name);
-  await ref.put(proofFile);
-  const img=await ref.getDownloadURL();
-
-  await db.collection("orders").add({
-    service:localStorage.getItem("serviceName"),
-    price:localStorage.getItem("servicePrice"),
-    paymentMethod,
-    proofImage:img,
-    email:user.email,
-    status:"بانتظار المراجعة",
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  db.collection("orders").add({
+    service: localStorage.getItem("serviceName"),
+    price: localStorage.getItem("servicePrice"),
+    email: user.email,
+    paymentMethod: paymentMethod,
+    status: "بانتظار المراجعة",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("✅ تم إرسال الطلب");
+    location.href="orders.html";
   });
-
-  alert("✅ تم إرسال الطلب");
-  location.href="orders.html";
 }
 </script>
 
