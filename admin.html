@@ -12,46 +12,27 @@ body{
   color:#fff;
   min-height:100vh;
 }
-
-/* Container */
 .container{
   max-width:1100px;
   margin:auto;
   padding:30px 15px;
-  animation:fadeIn .8s ease;
+  animation:fade .8s ease;
 }
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(40px)}
-  to{opacity:1;transform:translateY(0)}
+@keyframes fade{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:none}
 }
-
-h1{
-  text-align:center;
-  margin-bottom:30px;
-}
-
-/* Buttons */
+h1{text-align:center;margin-bottom:30px}
 .top-actions{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-bottom:30px;
+  display:flex;gap:10px;justify-content:center;margin-bottom:30px;
 }
-
 button{
-  padding:10px 16px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  color:#fff;
-  font-size:14px;
+  padding:10px 16px;border:none;border-radius:12px;
+  cursor:pointer;color:#fff;font-size:14px;
 }
-
 .go-store{background:#16a34a}
 .logout{background:#dc2626}
 
-/* Boxes */
 .box{
   background:rgba(255,255,255,.12);
   backdrop-filter:blur(14px);
@@ -61,58 +42,42 @@ button{
   box-shadow:0 25px 50px rgba(0,0,0,.35);
 }
 
-/* Inputs */
-input,textarea{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border:none;
-  border-radius:10px;
-  outline:none;
+input,textarea,select{
+  width:100%;padding:12px;margin-bottom:10px;
+  border:none;border-radius:10px;outline:none;
 }
 
-/* Services grid */
 .services{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:20px;
 }
-
 .service{
   background:rgba(255,255,255,.15);
   border-radius:18px;
   padding:15px;
   text-align:center;
-  box-shadow:0 15px 35px rgba(0,0,0,.3);
-  animation:pop .6s ease;
 }
-
-@keyframes pop{
-  from{transform:scale(.85);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-
 .service img{
-  width:80px;
-  height:80px;
-  object-fit:contain;
-  border-radius:50%;
-  background:#fff;
-  padding:8px;
-  margin-bottom:10px;
+  width:80px;height:80px;object-fit:contain;
+  border-radius:50%;background:#fff;padding:8px;
 }
+.price{color:#22c55e;font-weight:bold}
+.delete{background:#dc2626;margin-top:10px;width:100%}
 
-.price{
-  color:#22c55e;
-  font-weight:bold;
-  margin:6px 0;
+.order{
+  background:rgba(255,255,255,.15);
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:15px;
 }
-
-.delete{
-  background:#dc2626;
-  margin-top:10px;
-  width:100%;
+.badge{
+  padding:4px 10px;border-radius:20px;font-size:12px;
 }
+.new{background:#2563eb}
+.progress{background:#f59e0b}
+.done{background:#16a34a}
+.notify{background:#38bdf8;margin-top:8px;width:100%}
 </style>
 </head>
 
@@ -126,7 +91,7 @@ input,textarea{
   <button class="logout" onclick="logout()">تسجيل خروج</button>
 </div>
 
-<!-- Add service -->
+<!-- إضافة خدمة -->
 <div class="box">
 <h2>➕ إضافة خدمة</h2>
 <input id="serviceName" placeholder="اسم الخدمة">
@@ -136,11 +101,18 @@ input,textarea{
 <button onclick="addService()">إضافة الخدمة</button>
 </div>
 
-<!-- Services -->
+<!-- الخدمات -->
 <div class="box">
 <h2>🛍 الخدمات</h2>
 <div class="services" id="services"></div>
 </div>
+
+<!-- الطلبات -->
+<div class="box">
+<h2>📦 الطلبات</h2>
+<div id="orders"></div>
+</div>
+
 </div>
 
 <!-- Firebase -->
@@ -157,71 +129,88 @@ firebase.initializeApp({
 
 const auth=firebase.auth();
 const db=firebase.firestore();
-
 const ADMINS=["admin@admin.com","admin2@admin.com"];
 
-/* Protect admin */
 auth.onAuthStateChanged(user=>{
-  if(!user){location.href="login.html";return;}
-  if(!ADMINS.includes(user.email)){
-    location.href="index.html";
-  }
+  if(!user) location.href="login.html";
+  if(!ADMINS.includes(user.email)) location.href="index.html";
 });
 
 function logout(){
   auth.signOut().then(()=>location.href="login.html");
 }
 
-/* Add service */
+/* إضافة خدمة */
 function addService(){
-  const name=serviceName.value.trim();
-  const desc=serviceDesc.value.trim();
-  const price=servicePrice.value.trim();
-  const image=serviceImage.value.trim();
-
-  if(!name||!price){
-    alert("أدخل الاسم والسعر");
-    return;
-  }
-
+  if(!serviceName.value||!servicePrice.value) return alert("أدخل البيانات");
   db.collection("services").add({
-    name,
-    desc,
-    price,
-    image,
+    name:serviceName.value,
+    desc:serviceDesc.value,
+    price:servicePrice.value,
+    image:serviceImage.value,
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
-
-  serviceName.value="";
-  serviceDesc.value="";
-  servicePrice.value="";
-  serviceImage.value="";
+  serviceName.value=serviceDesc.value=servicePrice.value=serviceImage.value="";
 }
 
-/* Load services */
-db.collection("services")
-.orderBy("createdAt","desc")
-.onSnapshot(snapshot=>{
+/* تحميل الخدمات */
+db.collection("services").onSnapshot(snap=>{
   services.innerHTML="";
-  snapshot.forEach(doc=>{
+  snap.forEach(doc=>{
     const s=doc.data();
     services.innerHTML+=`
       <div class="service">
-        <img src="${s.image || 'https://cdn-icons-png.flaticon.com/512/565/565547.png'}">
+        <img src="${s.image||'https://cdn-icons-png.flaticon.com/512/565/565547.png'}">
         <b>${s.name}</b>
         <div class="price">$ ${s.price}</div>
-        <button class="delete" onclick="deleteService('${doc.id}')">
-          🗑 حذف الخدمة
-        </button>
-      </div>
-    `;
+        <button class="delete" onclick="deleteService('${doc.id}')">🗑 حذف</button>
+      </div>`;
   });
 });
 
 function deleteService(id){
-  if(confirm("متأكد من حذف الخدمة؟")){
-    db.collection("services").doc(id).delete();
-  }
+  if(confirm("حذف الخدمة؟")) db.collection("services").doc(id).delete();
+}
+
+/* الطلبات + إشعار */
+db.collection("orders").orderBy("createdAt","desc")
+.onSnapshot(snap=>{
+  orders.innerHTML="";
+  snap.forEach(doc=>{
+    const o=doc.data();
+    orders.innerHTML+=`
+      <div class="order">
+        <b>${o.service}</b><br>
+        👤 ${o.email}<br>
+        <span class="badge ${o.status=='جديد'?'new':o.status=='قيد التنفيذ'?'progress':'done'}">
+          ${o.status}
+        </span>
+        <select onchange="changeStatus('${doc.id}','${o.email}',this.value)">
+          <option ${o.status=="جديد"?"selected":""}>جديد</option>
+          <option ${o.status=="قيد التنفيذ"?"selected":""}>قيد التنفيذ</option>
+          <option ${o.status=="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
+        </select>
+        <button class="notify" onclick="sendNotify('${o.email}','طلبك (${o.service}) تم تحديثه')">
+          🔔 إرسال إشعار
+        </button>
+      </div>`;
+  });
+});
+
+/* تحديث الحالة + إشعار تلقائي */
+function changeStatus(id,email,status){
+  db.collection("orders").doc(id).update({status});
+  sendNotify(email,`تم تحديث حالة طلبك إلى: ${status}`);
+}
+
+/* إرسال إشعار */
+function sendNotify(email,message){
+  db.collection("notifications").add({
+    email,
+    message,
+    read:false,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
 }
 </script>
 
