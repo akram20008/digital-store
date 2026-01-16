@@ -15,6 +15,7 @@ body{
   justify-content:center;
   align-items:center;
 }
+
 .box{
   width:94%;
   max-width:460px;
@@ -22,7 +23,13 @@ body{
   border:1px solid #1e293b;
   border-radius:22px;
   padding:22px;
+  animation:fade .6s ease;
 }
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(30px)}
+}
+
 h2{text-align:center;margin-bottom:16px}
 
 .info{
@@ -39,16 +46,32 @@ h2{text-align:center;margin-bottom:16px}
   padding:14px;
   margin-bottom:10px;
   cursor:pointer;
+  transition:.3s;
 }
-.pay small{
-  display:block;
-  color:#93c5fd;
-  margin-top:4px;
-  line-height:1.6;
-}
+
 .pay.active{
   border-color:#4ade80;
   background:#022c22;
+}
+
+.pay-title{
+  font-size:16px;
+}
+
+.details{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:#020617;
+  border:1px dashed #334155;
+  font-size:14px;
+  line-height:1.7;
+  display:none;
+  animation:open .3s ease;
+}
+
+@keyframes open{
+  from{opacity:0;transform:scale(.95)}
 }
 
 .upload{
@@ -87,38 +110,39 @@ button{
   </div>
 
   <!-- بنك فلسطين -->
-  <div class="pay" onclick="selectPay(this,'بنك فلسطين','اسم الحساب: محمد أحمد | رقم الحساب: 123456789')">
-    🏦 بنك فلسطين
-    <small>
+  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
+    <div class="pay-title">🏦 بنك فلسطين</div>
+    <div class="details">
       اسم الحساب: محمد أحمد<br>
       رقم الحساب: 123456789
-    </small>
+    </div>
   </div>
 
   <!-- محفظة -->
-  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية','اسم المحفظة: محمد أحمد | رقم المحفظة: 0590000000')">
-    📱 محفظة إلكترونية
-    <small>
+  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
+    <div class="pay-title">📱 محفظة إلكترونية</div>
+    <div class="details">
       اسم المحفظة: محمد أحمد<br>
       رقم المحفظة: 0590000000
-    </small>
+    </div>
   </div>
 
   <!-- PayPal -->
-  <div class="pay" onclick="selectPay(this,'PayPal','Email: payments@store.com')">
-    💳 PayPal
-    <small>
-      البريد: payments@store.com
-    </small>
+  <div class="pay" onclick="selectPay(this,'PayPal')">
+    <div class="pay-title">💳 PayPal</div>
+    <div class="details">
+      البريد الإلكتروني:<br>
+      payments@store.com
+    </div>
   </div>
 
   <!-- جوال باي -->
-  <div class="pay" onclick="selectPay(this,'جوال باي','اسم الحساب: محمد أحمد | رقم: 0560000000')">
-    📞 جوال باي
-    <small>
+  <div class="pay" onclick="selectPay(this,'جوال باي')">
+    <div class="pay-title">📞 جوال باي</div>
+    <div class="details">
       اسم الحساب: محمد أحمد<br>
       الرقم: 0560000000
-    </small>
+    </div>
   </div>
 
   <div class="upload">
@@ -153,13 +177,16 @@ document.getElementById("servicePrice").textContent =
   localStorage.getItem("servicePrice") || "0";
 
 let paymentMethod="";
-let paymentInfo="";
 
-function selectPay(el,method,info){
-  document.querySelectorAll(".pay").forEach(p=>p.classList.remove("active"));
+function selectPay(el,method){
+  document.querySelectorAll(".pay").forEach(p=>{
+    p.classList.remove("active");
+    p.querySelector(".details").style.display="none";
+  });
+
   el.classList.add("active");
+  el.querySelector(".details").style.display="block";
   paymentMethod = method;
-  paymentInfo = info;
 }
 
 async function confirmOrder(){
@@ -186,17 +213,16 @@ async function confirmOrder(){
     service: localStorage.getItem("serviceName"),
     price: localStorage.getItem("servicePrice"),
     paymentMethod,
-    paymentInfo,
     proofImage: imageURL,
     email: auth.currentUser.email,
-    status: "بانتظار المراجعة",
+    status:"بانتظار المراجعة",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  alert("✅ تم إرسال الطلب بنجاح");
+  alert("✅ تم إرسال الطلب");
   location.href="orders.html";
 }
 </script>
 
 </body>
-    </html>
+      </html>
