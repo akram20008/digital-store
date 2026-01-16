@@ -15,67 +15,51 @@ body{
   align-items:center;
   justify-content:center;
 }
-
 .box{
-  width:95%;
-  max-width:480px;
+  width:92%;
+  max-width:450px;
   background:#020617;
   border:1px solid #1e293b;
-  border-radius:24px;
-  padding:24px;
-  animation:fade .6s ease;
+  border-radius:22px;
+  padding:22px;
 }
-@keyframes fade{
-  from{opacity:0;transform:translateY(40px)}
-}
-
 h2{text-align:center;margin-bottom:16px}
-
-.pay{
-  background:#111827;
+.info{
+  background:#020617;
+  border:1px solid #1e293b;
   border-radius:14px;
-  padding:14px;
+  padding:12px;
+  margin-bottom:14px;
+}
+.pay{
+  border:1px solid #1e293b;
+  border-radius:14px;
+  padding:12px;
   margin-bottom:10px;
   cursor:pointer;
 }
 .pay.active{
+  border-color:#4ade80;
   background:#022c22;
-  border:1px solid #4ade80;
 }
-
-.details{
-  margin-top:12px;
-  padding:12px;
-  border:1px dashed #334155;
-  border-radius:14px;
-  display:none;
-}
-
-input[type=file]{
+.upload{
   margin-top:14px;
-  width:100%;
-  color:#fff;
 }
-
-.preview{
-  margin-top:10px;
-}
-.preview img{
-  width:100%;
-  border-radius:14px;
-  max-height:220px;
-  object-fit:cover;
-}
-
 button{
   width:100%;
-  margin-top:16px;
+  margin-top:18px;
   padding:14px;
   border:none;
-  border-radius:18px;
-  background:linear-gradient(135deg,#2563eb,#1e40af);
+  border-radius:16px;
+  background:#2563eb;
   color:#fff;
   font-size:16px;
+  cursor:pointer;
+}
+.back{
+  margin-top:12px;
+  text-align:center;
+  color:#93c5fd;
   cursor:pointer;
 }
 </style>
@@ -86,24 +70,40 @@ button{
 <div class="box">
   <h2>💳 تفاصيل الدفع</h2>
 
-  <p>📦 الخدمة: <b id="serviceName"></b></p>
-  <p>💰 السعر: <b>$<span id="servicePrice"></span></b></p>
+  <div class="info">
+    📦 الخدمة: <b id="serviceName"></b><br>
+    💰 السعر: <b>$<span id="servicePrice"></span></b>
+  </div>
 
-  <div class="pay" onclick="selectPay(this,'bank')">🏦 بنك فلسطين</div>
-  <div class="pay" onclick="selectPay(this,'wallet')">📱 محفظة إلكترونية</div>
-  <div class="pay" onclick="selectPay(this,'paypal')">💳 PayPal</div>
-  <div class="pay" onclick="selectPay(this,'jawwal')">📞 جوال باي</div>
+  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
+    🏦 بنك فلسطين<br>
+    رقم الحساب: <b>123456789</b>
+  </div>
 
-  <div class="details" id="detailsBox"></div>
+  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
+    📱 محفظة إلكترونية<br>
+    رقم المحفظة: <b>0590000000</b>
+  </div>
 
-  <!-- رفع صورة الإثبات -->
-  <input type="file" accept="image/*" id="proofInput">
-  <div class="preview" id="preview"></div>
+  <div class="pay" onclick="selectPay(this,'PayPal')">
+    💳 PayPal<br>
+    البريد: <b>payments@store.com</b>
+  </div>
 
-  <button onclick="confirmOrder()">✅ تأكيد الطلب</button>
+  <div class="pay" onclick="selectPay(this,'جوال باي')">
+    📞 جوال باي<br>
+    الرقم: <b>0560000000</b>
+  </div>
+
+  <div class="upload">
+    📷 صورة إثبات الدفع
+    <input type="file" id="proof" accept="image/*">
+  </div>
+
+  <button onclick="confirmOrder()">تأكيد الطلب</button>
+  <div class="back" onclick="location.href='index.html'">⬅ الرجوع للمتجر</div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -117,77 +117,57 @@ firebase.initializeApp({
   storageBucket:"digital-store-268a9.appspot.com"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const storage=firebase.storage();
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-const serviceName=localStorage.getItem("serviceName");
-const servicePrice=localStorage.getItem("servicePrice");
-document.getElementById("serviceName").textContent=serviceName;
-document.getElementById("servicePrice").textContent=servicePrice;
+document.getElementById("serviceName").textContent =
+  localStorage.getItem("serviceName") || "-";
+document.getElementById("servicePrice").textContent =
+  localStorage.getItem("servicePrice") || "0";
 
-let paymentMethod="";
-const detailsBox=document.getElementById("detailsBox");
-const proofInput=document.getElementById("proofInput");
-const preview=document.getElementById("preview");
+let paymentMethod = "";
 
-function selectPay(el,type){
-  document.querySelectorAll(".pay").forEach(p=>p.classList.remove("active"));
+function selectPay(el,method){
+  document.querySelectorAll(".pay")
+    .forEach(p=>p.classList.remove("active"));
   el.classList.add("active");
-  detailsBox.style.display="block";
-
-  if(type==="bank"){
-    paymentMethod="بنك فلسطين";
-    detailsBox.innerHTML="رقم الحساب: <b>1234567890</b>";
-  }
-  if(type==="wallet"){
-    paymentMethod="محفظة إلكترونية";
-    detailsBox.innerHTML="رقم المحفظة: <b>0599123456</b>";
-  }
-  if(type==="paypal"){
-    paymentMethod="PayPal";
-    detailsBox.innerHTML="PayPal: <b>payments@digitalstore.com</b>";
-  }
-  if(type==="jawwal"){
-    paymentMethod="جوال باي";
-    detailsBox.innerHTML="رقم جوال باي: <b>0599876543</b>";
-  }
+  paymentMethod = method;
 }
 
-/* معاينة الصورة */
-proofInput.onchange=()=>{
-  const file=proofInput.files[0];
-  if(file){
-    preview.innerHTML=`<img src="${URL.createObjectURL(file)}">`;
-  }
-}
-
-/* تأكيد الطلب */
 async function confirmOrder(){
-  const user=auth.currentUser;
-  if(!user){alert("سجل دخول");return;}
-  if(!paymentMethod){alert("اختر طريقة الدفع");return;}
-  if(!proofInput.files[0]){alert("ارفع صورة إثبات الدفع");return;}
+  const user = auth.currentUser;
+  const file = document.getElementById("proof").files[0];
 
-  const file=proofInput.files[0];
-  const ref=storage.ref("proofs/"+Date.now()+"_"+file.name);
+  if(!paymentMethod){
+    alert("اختر طريقة الدفع");
+    return;
+  }
+  if(!file){
+    alert("ارفع صورة إثبات الدفع");
+    return;
+  }
+
+  // رفع الصورة
+  const ref = storage.ref("proofs/"+Date.now()+"_"+file.name);
   await ref.put(file);
-  const imageURL=await ref.getDownloadURL();
+  const imageURL = await ref.getDownloadURL();
 
+  // حفظ الطلب
   await db.collection("orders").add({
-    email:user.email,
-    service:serviceName,
-    price:servicePrice,
+    service: localStorage.getItem("serviceName"),
+    price: localStorage.getItem("servicePrice"),
     paymentMethod,
-    proofImage:imageURL,
-    status:"بانتظار المراجعة",
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    proofImage: imageURL,
+    email: user.email,
+    status: "بانتظار المراجعة",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  alert("✅ تم إرسال الطلب");
-  location.href="orders.html";
+  alert("✅ تم إرسال الطلب بنجاح");
+  location.href = "orders.html";
 }
 </script>
 
 </body>
-</html>
+                </html>
