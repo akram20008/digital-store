@@ -54,10 +54,6 @@ h2{text-align:center;margin-bottom:16px}
   background:#022c22;
 }
 
-.pay-title{
-  font-size:16px;
-}
-
 .details{
   margin-top:10px;
   padding:10px;
@@ -65,7 +61,6 @@ h2{text-align:center;margin-bottom:16px}
   background:#020617;
   border:1px dashed #334155;
   font-size:14px;
-  line-height:1.7;
   display:none;
   animation:open .3s ease;
 }
@@ -90,6 +85,10 @@ button{
   cursor:pointer;
 }
 
+button:active{
+  transform:scale(.97);
+}
+
 .back{
   margin-top:12px;
   text-align:center;
@@ -109,38 +108,33 @@ button{
     💰 السعر: <b>$<span id="servicePrice"></span></b>
   </div>
 
-  <!-- بنك فلسطين -->
   <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
-    <div class="pay-title">🏦 بنك فلسطين</div>
+    🏦 بنك فلسطين
     <div class="details">
       اسم الحساب: محمد أحمد<br>
       رقم الحساب: 123456789
     </div>
   </div>
 
-  <!-- محفظة -->
   <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
-    <div class="pay-title">📱 محفظة إلكترونية</div>
+    📱 محفظة إلكترونية
     <div class="details">
       اسم المحفظة: محمد أحمد<br>
-      رقم المحفظة: 0590000000
+      الرقم: 0590000000
     </div>
   </div>
 
-  <!-- PayPal -->
   <div class="pay" onclick="selectPay(this,'PayPal')">
-    <div class="pay-title">💳 PayPal</div>
+    💳 PayPal
     <div class="details">
-      البريد الإلكتروني:<br>
-      payments@store.com
+      البريد: payments@store.com
     </div>
   </div>
 
-  <!-- جوال باي -->
   <div class="pay" onclick="selectPay(this,'جوال باي')">
-    <div class="pay-title">📞 جوال باي</div>
+    📞 جوال باي
     <div class="details">
-      اسم الحساب: محمد أحمد<br>
+      الاسم: محمد أحمد<br>
       الرقم: 0560000000
     </div>
   </div>
@@ -171,37 +165,35 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-document.getElementById("serviceName").textContent =
-  localStorage.getItem("serviceName") || "-";
-document.getElementById("servicePrice").textContent =
-  localStorage.getItem("servicePrice") || "0";
+let currentUser = null;
+let paymentMethod = "";
 
-let paymentMethod="";
+auth.onAuthStateChanged(user=>{
+  currentUser = user;
+});
+
+serviceName.textContent = localStorage.getItem("serviceName") || "-";
+servicePrice.textContent = localStorage.getItem("servicePrice") || "0";
 
 function selectPay(el,method){
   document.querySelectorAll(".pay").forEach(p=>{
     p.classList.remove("active");
     p.querySelector(".details").style.display="none";
   });
-
   el.classList.add("active");
   el.querySelector(".details").style.display="block";
   paymentMethod = method;
 }
 
 async function confirmOrder(){
-  if(!auth.currentUser){
-    alert("يجب تسجيل الدخول");
+  if(!currentUser){
+    alert("سجل دخولك أولاً");
     return;
   }
 
-  const file = document.getElementById("proof").files[0];
-  if(!paymentMethod){
-    alert("اختر طريقة الدفع");
-    return;
-  }
-  if(!file){
-    alert("ارفع صورة إثبات الدفع");
+  const file = proof.files[0];
+  if(!paymentMethod || !file){
+    alert("اختر طريقة الدفع وارفع الصورة");
     return;
   }
 
@@ -214,7 +206,7 @@ async function confirmOrder(){
     price: localStorage.getItem("servicePrice"),
     paymentMethod,
     proofImage: imageURL,
-    email: auth.currentUser.email,
+    email: currentUser.email,
     status:"بانتظار المراجعة",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
@@ -225,4 +217,4 @@ async function confirmOrder(){
 </script>
 
 </body>
-      </html>
+</html>
