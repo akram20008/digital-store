@@ -12,39 +12,49 @@ body{
   color:#fff;
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
 }
 .box{
-  width:92%;
-  max-width:450px;
+  width:94%;
+  max-width:460px;
   background:#020617;
   border:1px solid #1e293b;
   border-radius:22px;
   padding:22px;
 }
 h2{text-align:center;margin-bottom:16px}
+
 .info{
   background:#020617;
   border:1px solid #1e293b;
   border-radius:14px;
-  padding:12px;
-  margin-bottom:14px;
+  padding:14px;
+  margin-bottom:16px;
 }
+
 .pay{
   border:1px solid #1e293b;
   border-radius:14px;
-  padding:12px;
+  padding:14px;
   margin-bottom:10px;
   cursor:pointer;
+}
+.pay small{
+  display:block;
+  color:#93c5fd;
+  margin-top:4px;
+  line-height:1.6;
 }
 .pay.active{
   border-color:#4ade80;
   background:#022c22;
 }
+
 .upload{
   margin-top:14px;
 }
+
 button{
   width:100%;
   margin-top:18px;
@@ -56,6 +66,7 @@ button{
   font-size:16px;
   cursor:pointer;
 }
+
 .back{
   margin-top:12px;
   text-align:center;
@@ -75,28 +86,43 @@ button{
     💰 السعر: <b>$<span id="servicePrice"></span></b>
   </div>
 
-  <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
-    🏦 بنك فلسطين<br>
-    رقم الحساب: <b>123456789</b>
+  <!-- بنك فلسطين -->
+  <div class="pay" onclick="selectPay(this,'بنك فلسطين','اسم الحساب: محمد أحمد | رقم الحساب: 123456789')">
+    🏦 بنك فلسطين
+    <small>
+      اسم الحساب: محمد أحمد<br>
+      رقم الحساب: 123456789
+    </small>
   </div>
 
-  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية')">
-    📱 محفظة إلكترونية<br>
-    رقم المحفظة: <b>0590000000</b>
+  <!-- محفظة -->
+  <div class="pay" onclick="selectPay(this,'محفظة إلكترونية','اسم المحفظة: محمد أحمد | رقم المحفظة: 0590000000')">
+    📱 محفظة إلكترونية
+    <small>
+      اسم المحفظة: محمد أحمد<br>
+      رقم المحفظة: 0590000000
+    </small>
   </div>
 
-  <div class="pay" onclick="selectPay(this,'PayPal')">
-    💳 PayPal<br>
-    البريد: <b>payments@store.com</b>
+  <!-- PayPal -->
+  <div class="pay" onclick="selectPay(this,'PayPal','Email: payments@store.com')">
+    💳 PayPal
+    <small>
+      البريد: payments@store.com
+    </small>
   </div>
 
-  <div class="pay" onclick="selectPay(this,'جوال باي')">
-    📞 جوال باي<br>
-    الرقم: <b>0560000000</b>
+  <!-- جوال باي -->
+  <div class="pay" onclick="selectPay(this,'جوال باي','اسم الحساب: محمد أحمد | رقم: 0560000000')">
+    📞 جوال باي
+    <small>
+      اسم الحساب: محمد أحمد<br>
+      الرقم: 0560000000
+    </small>
   </div>
 
   <div class="upload">
-    📷 صورة إثبات الدفع
+    📷 رفع صورة إثبات الدفع
     <input type="file" id="proof" accept="image/*">
   </div>
 
@@ -126,19 +152,23 @@ document.getElementById("serviceName").textContent =
 document.getElementById("servicePrice").textContent =
   localStorage.getItem("servicePrice") || "0";
 
-let paymentMethod = "";
+let paymentMethod="";
+let paymentInfo="";
 
-function selectPay(el,method){
-  document.querySelectorAll(".pay")
-    .forEach(p=>p.classList.remove("active"));
+function selectPay(el,method,info){
+  document.querySelectorAll(".pay").forEach(p=>p.classList.remove("active"));
   el.classList.add("active");
   paymentMethod = method;
+  paymentInfo = info;
 }
 
 async function confirmOrder(){
-  const user = auth.currentUser;
-  const file = document.getElementById("proof").files[0];
+  if(!auth.currentUser){
+    alert("يجب تسجيل الدخول");
+    return;
+  }
 
+  const file = document.getElementById("proof").files[0];
   if(!paymentMethod){
     alert("اختر طريقة الدفع");
     return;
@@ -148,26 +178,25 @@ async function confirmOrder(){
     return;
   }
 
-  // رفع الصورة
   const ref = storage.ref("proofs/"+Date.now()+"_"+file.name);
   await ref.put(file);
   const imageURL = await ref.getDownloadURL();
 
-  // حفظ الطلب
   await db.collection("orders").add({
     service: localStorage.getItem("serviceName"),
     price: localStorage.getItem("servicePrice"),
     paymentMethod,
+    paymentInfo,
     proofImage: imageURL,
-    email: user.email,
+    email: auth.currentUser.email,
     status: "بانتظار المراجعة",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   alert("✅ تم إرسال الطلب بنجاح");
-  location.href = "orders.html";
+  location.href="orders.html";
 }
 </script>
 
 </body>
-                </html>
+    </html>
