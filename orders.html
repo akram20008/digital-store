@@ -46,6 +46,14 @@ header{
   color:#93c5fd;
   cursor:pointer;
 }
+.admin-clear{
+  background:#dc2626;
+  border:none;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:12px;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -53,7 +61,10 @@ header{
 
 <header>
   <div class="back" onclick="location.href='index.html'">⬅ المتجر</div>
-  <h3>📦 طلباتي</h3>
+  <h3>📦 الطلبات</h3>
+  <button id="clearBtn" class="admin-clear" style="display:none">
+    🗑 تفريغ الطلبات
+  </button>
 </header>
 
 <div class="container" id="orders"></div>
@@ -72,6 +83,9 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 const box = document.getElementById("orders");
+const clearBtn = document.getElementById("clearBtn");
+
+const ADMINS = ["admin@admin.com","admin2@admin.com"];
 
 auth.onAuthStateChanged(user=>{
   if(!user){
@@ -79,14 +93,19 @@ auth.onAuthStateChanged(user=>{
     return;
   }
 
-  // ❗ بدون orderBy عشان ما يطلب Index
+  // إظهار زر التفريغ للأدمن فقط
+  if(ADMINS.includes(user.email)){
+    clearBtn.style.display="block";
+  }
+
+  // عرض الطلبات
   db.collection("orders")
     .where("email","==",user.email)
     .onSnapshot(snap=>{
       box.innerHTML="";
 
       if(snap.empty){
-        box.innerHTML="<p>❌ لا يوجد طلبات بعد</p>";
+        box.innerHTML="<p>❌ لا يوجد طلبات</p>";
         return;
       }
 
@@ -95,8 +114,8 @@ auth.onAuthStateChanged(user=>{
         box.innerHTML += `
           <div class="card">
             <b>📦 ${o.service}</b><br>
-            💰 السعر: $${o.price}<br>
-            💳 طريقة الدفع: ${o.paymentMethod}<br>
+            💰 السعر: $${o.price || "-"}<br>
+            💳 طريقة الدفع: ${o.paymentMethod || "-"}<br>
             <div class="status">📌 ${o.status || "قيد المراجعة"}</div>
             ${o.proofImage ? `<img src="${o.proofImage}">` : ""}
           </div>
@@ -104,6 +123,21 @@ auth.onAuthStateChanged(user=>{
       });
     });
 });
+
+// تفريغ الطلبات (للأدمن فقط)
+clearBtn.onclick = async ()=>{
+  if(!confirm("⚠ هل أنت متأكد من تفريغ كل الطلبات؟")) return;
+
+  const snap = await db.collection("orders").get();
+  const batch = db.batch();
+
+  snap.forEach(doc=>{
+    batch.delete(doc.ref);
+  });
+
+  await batch.commit();
+  alert("✅ تم تفريغ جميع الطلبات");
+};
 </script>
 
 </body>
