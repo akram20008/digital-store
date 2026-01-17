@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إضافة خدمة</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Tajawal,Tahoma;
+  background:#020617;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.box{
+  width:95%;
+  max-width:420px;
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:22px;
+  padding:24px;
+  animation:fade .6s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(30px)}
+}
+
+h2{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+input, textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  font-family:inherit;
+}
+
+textarea{
+  resize:none;
+  height:90px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:#2563eb;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.back{
+  margin-top:12px;
+  text-align:center;
+  color:#93c5fd;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>➕ إضافة خدمة</h2>
+
+  <input id="name" placeholder="اسم الخدمة">
+  <textarea id="details" placeholder="تفاصيل الخدمة"></textarea>
+  <input id="price" type="number" placeholder="سعر الخدمة">
+  <input id="image" placeholder="رابط صورة الخدمة">
+
+  <button onclick="addService()">حفظ الخدمة</button>
+  <div class="back" onclick="location.href='admin.html'">⬅ الرجوع للأدمن</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
+  authDomain:"digital-store-268a9.firebaseapp.com",
+  projectId:"digital-store-268a9"
+});
+
+const db = firebase.firestore();
+
+function addService(){
+  const name = document.getElementById("name").value.trim();
+  const details = document.getElementById("details").value.trim();
+  const price = document.getElementById("price").value;
+  const image = document.getElementById("image").value.trim();
+
+  if(!name || !details || !price || !image){
+    alert("❌ جميع الحقول مطلوبة");
+    return;
+  }
+
+  db.collection("services").add({
+    name,
+    details,
+    price,
+    image,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("✅ تم إضافة الخدمة");
+    location.reload();
+  });
+}
+</script>
+
+</body>
+    </html>
