@@ -109,6 +109,19 @@ header{
   color:#e5e7eb;
 }
 
+/* 🖼 صورة الخدمة */
+.service-img{
+  margin-top:14px;
+  overflow:hidden;
+  border-radius:16px;
+}
+
+.service-img img{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+}
+
 /* 🖼 صورة الإثبات */
 .proof{
   margin-top:14px;
@@ -163,7 +176,6 @@ header{
 
 <header>🛠 لوحة إدارة الطلبات</header>
 
-<!-- 🔥 أزرار التحكم -->
 <div class="admin-actions">
   <a href="index.html" class="action-btn store">🏪 الرجوع للمتجر</a>
   <a href="add-service.html" class="action-btn add">➕ إضافة خدمة</a>
@@ -220,10 +232,16 @@ auth.onAuthStateChanged(user=>{
             <div class="info">
               👤 العميل: ${o.email.split("@")[0]}<br>
               📧 البريد: ${o.email}<br>
+              📝 تفاصيل الخدمة: ${o.serviceDetails || "-"}<br>
               💳 الدفع: ${o.paymentMethod}<br>
               💰 السعر: $${o.price}<br>
               🕒 التاريخ: ${date}
             </div>
+
+            ${o.serviceImage ? `
+              <div class="service-img">
+                <img src="${o.serviceImage}">
+              </div>` : ""}
 
             ${o.proofImage ? `
               <div class="proof">
