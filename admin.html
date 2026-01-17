@@ -7,115 +7,135 @@
 <style>
 body{
   margin:0;
-  font-family:Tahoma;
-  background:radial-gradient(circle at top,#1e3a8a,#020617 70%);
+  font-family:Tajawal,Tahoma;
+  background:#020617;
   color:#fff;
-  min-height:100vh;
-}
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:30px 15px;
-  animation:fade .8s ease;
-}
-@keyframes fade{
-  from{opacity:0;transform:translateY(30px)}
-  to{opacity:1;transform:none}
-}
-h1{text-align:center;margin-bottom:30px}
-.top-actions{
-  display:flex;gap:10px;justify-content:center;margin-bottom:30px;
-}
-button{
-  padding:10px 16px;border:none;border-radius:12px;
-  cursor:pointer;color:#fff;font-size:14px;
-}
-.go-store{background:#16a34a}
-.logout{background:#dc2626}
-
-.box{
-  background:rgba(255,255,255,.12);
-  backdrop-filter:blur(14px);
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:25px;
-  box-shadow:0 25px 50px rgba(0,0,0,.35);
 }
 
-input,textarea,select{
-  width:100%;padding:12px;margin-bottom:10px;
-  border:none;border-radius:10px;outline:none;
-}
-
-.services{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:20px;
-}
-.service{
-  background:rgba(255,255,255,.15);
-  border-radius:18px;
-  padding:15px;
+header{
+  padding:18px 24px;
+  background:#020617;
+  border-bottom:1px solid #1e293b;
   text-align:center;
+  font-size:20px;
 }
-.service img{
-  width:80px;height:80px;object-fit:contain;
-  border-radius:50%;background:#fff;padding:8px;
-}
-.price{color:#22c55e;font-weight:bold}
-.delete{background:#dc2626;margin-top:10px;width:100%}
 
-.order{
-  background:rgba(255,255,255,.15);
-  border-radius:16px;
-  padding:15px;
-  margin-bottom:15px;
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:24px;
 }
+
+/* 🔥 كرت الطلب */
+.card{
+  background:linear-gradient(160deg,#020617,#020617);
+  border:1px solid #1e293b;
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:18px;
+
+  animation:cardIn .7s cubic-bezier(.25,.8,.25,1);
+  transition:.35s;
+}
+
+.card:hover{
+  transform:translateY(-6px) scale(1.01);
+  box-shadow:0 20px 50px rgba(0,0,0,.45);
+  border-color:#38bdf8;
+}
+
+@keyframes cardIn{
+  from{
+    opacity:0;
+    transform:translateY(40px) scale(.95);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
 .badge{
-  padding:4px 10px;border-radius:20px;font-size:12px;
+  background:#022c22;
+  color:#4ade80;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
 }
-.new{background:#2563eb}
-.progress{background:#f59e0b}
-.done{background:#16a34a}
-.notify{background:#38bdf8;margin-top:8px;width:100%}
+
+.info{
+  font-size:15px;
+  line-height:1.8;
+  color:#e5e7eb;
+}
+
+/* 🖼 صورة الإثبات */
+.proof{
+  margin-top:14px;
+  overflow:hidden;
+  border-radius:16px;
+}
+
+.proof img{
+  width:100%;
+  max-height:260px;
+  object-fit:cover;
+  cursor:pointer;
+  transition:.4s;
+}
+
+.proof img:hover{
+  transform:scale(1.08);
+}
+
+/* تكبير الصورة */
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.lightbox img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:18px;
+  animation:zoom .4s ease;
+}
+
+@keyframes zoom{
+  from{transform:scale(.6);opacity:0}
+}
+
+/* لا يوجد طلبات */
+.empty{
+  text-align:center;
+  margin-top:60px;
+  color:#94a3b8;
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-<h1>🔐 لوحة تحكم الأدمن</h1>
+<header>🛠 لوحة إدارة الطلبات</header>
 
-<div class="top-actions">
-  <button class="go-store" onclick="location.href='index.html'">🛒 المتجر</button>
-  <button class="logout" onclick="logout()">تسجيل خروج</button>
+<div class="container" id="orders"></div>
+
+<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
+  <img id="lightImg">
 </div>
 
-<!-- إضافة خدمة -->
-<div class="box">
-<h2>➕ إضافة خدمة</h2>
-<input id="serviceName" placeholder="اسم الخدمة">
-<textarea id="serviceDesc" placeholder="وصف الخدمة"></textarea>
-<input id="servicePrice" type="number" placeholder="السعر">
-<input id="serviceImage" placeholder="رابط صورة الخدمة">
-<button onclick="addService()">إضافة الخدمة</button>
-</div>
-
-<!-- الخدمات -->
-<div class="box">
-<h2>🛍 الخدمات</h2>
-<div class="services" id="services"></div>
-</div>
-
-<!-- الطلبات -->
-<div class="box">
-<h2>📦 الطلبات</h2>
-<div id="orders"></div>
-</div>
-
-</div>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -127,90 +147,58 @@ firebase.initializeApp({
   projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const ADMINS=["admin@admin.com","admin2@admin.com"];
+const auth = firebase.auth();
+const db = firebase.firestore();
+const box = document.getElementById("orders");
 
 auth.onAuthStateChanged(user=>{
-  if(!user) location.href="login.html";
-  if(!ADMINS.includes(user.email)) location.href="index.html";
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+
+  db.collection("orders")
+    .orderBy("createdAt","desc")
+    .onSnapshot(snap=>{
+      box.innerHTML="";
+
+      if(snap.empty){
+        box.innerHTML=`<div class="empty">📭 لا يوجد طلبات</div>`;
+        return;
+      }
+
+      snap.forEach(doc=>{
+        const o = doc.data();
+        const date = o.createdAt?.toDate().toLocaleString("ar-EG") || "-";
+
+        box.innerHTML += `
+          <div class="card">
+            <div class="top">
+              <b>📦 ${o.service}</b>
+              <span class="badge">${o.status || "قيد المراجعة"}</span>
+            </div>
+
+            <div class="info">
+              👤 العميل: ${o.email.split("@")[0]}<br>
+              📧 البريد: ${o.email}<br>
+              💳 الدفع: ${o.paymentMethod}<br>
+              💰 السعر: $${o.price}<br>
+              🕒 التاريخ: ${date}
+            </div>
+
+            ${o.proofImage ? `
+              <div class="proof">
+                <img src="${o.proofImage}" onclick="openImg('${o.proofImage}')">
+              </div>` : ""}
+          </div>
+        `;
+      });
+    });
 });
 
-function logout(){
-  auth.signOut().then(()=>location.href="login.html");
-}
-
-/* إضافة خدمة */
-function addService(){
-  if(!serviceName.value||!servicePrice.value) return alert("أدخل البيانات");
-  db.collection("services").add({
-    name:serviceName.value,
-    desc:serviceDesc.value,
-    price:servicePrice.value,
-    image:serviceImage.value,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
-  serviceName.value=serviceDesc.value=servicePrice.value=serviceImage.value="";
-}
-
-/* تحميل الخدمات */
-db.collection("services").onSnapshot(snap=>{
-  services.innerHTML="";
-  snap.forEach(doc=>{
-    const s=doc.data();
-    services.innerHTML+=`
-      <div class="service">
-        <img src="${s.image||'https://cdn-icons-png.flaticon.com/512/565/565547.png'}">
-        <b>${s.name}</b>
-        <div class="price">$ ${s.price}</div>
-        <button class="delete" onclick="deleteService('${doc.id}')">🗑 حذف</button>
-      </div>`;
-  });
-});
-
-function deleteService(id){
-  if(confirm("حذف الخدمة؟")) db.collection("services").doc(id).delete();
-}
-
-/* الطلبات + إشعار */
-db.collection("orders").orderBy("createdAt","desc")
-.onSnapshot(snap=>{
-  orders.innerHTML="";
-  snap.forEach(doc=>{
-    const o=doc.data();
-    orders.innerHTML+=`
-      <div class="order">
-        <b>${o.service}</b><br>
-        👤 ${o.email}<br>
-        <span class="badge ${o.status=='جديد'?'new':o.status=='قيد التنفيذ'?'progress':'done'}">
-          ${o.status}
-        </span>
-        <select onchange="changeStatus('${doc.id}','${o.email}',this.value)">
-          <option ${o.status=="جديد"?"selected":""}>جديد</option>
-          <option ${o.status=="قيد التنفيذ"?"selected":""}>قيد التنفيذ</option>
-          <option ${o.status=="تم التنفيذ"?"selected":""}>تم التنفيذ</option>
-        </select>
-        <button class="notify" onclick="sendNotify('${o.email}','طلبك (${o.service}) تم تحديثه')">
-          🔔 إرسال إشعار
-        </button>
-      </div>`;
-  });
-});
-
-/* تحديث الحالة + إشعار تلقائي */
-function changeStatus(id,email,status){
-  db.collection("orders").doc(id).update({status});
-  sendNotify(email,`تم تحديث حالة طلبك إلى: ${status}`);
-}
-
-/* إرسال إشعار */
-function sendNotify(email,message){
-  db.collection("notifications").add({
-    email,
-    message,
-    read:false,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
+function openImg(src){
+  document.getElementById("lightImg").src = src;
+  document.getElementById("lightbox").style.display="flex";
 }
 </script>
 
