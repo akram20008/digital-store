@@ -20,6 +20,40 @@ header{
   font-size:20px;
 }
 
+/* ===== أزرار الأدمن ===== */
+.admin-actions{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin:18px 0;
+  flex-wrap:wrap;
+}
+
+.action-btn{
+  padding:12px 22px;
+  border-radius:999px;
+  font-size:14px;
+  text-decoration:none;
+  color:#fff;
+  transition:.35s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.action-btn.store{
+  background:linear-gradient(135deg,#334155,#0f172a);
+}
+
+.action-btn.add{
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+}
+
+.action-btn:hover{
+  transform:scale(1.08);
+  box-shadow:0 12px 30px rgba(0,0,0,.4);
+}
+
 .container{
   max-width:1000px;
   margin:auto;
@@ -33,7 +67,6 @@ header{
   border-radius:22px;
   padding:18px;
   margin-bottom:18px;
-
   animation:cardIn .7s cubic-bezier(.25,.8,.25,1);
   transition:.35s;
 }
@@ -129,6 +162,12 @@ header{
 <body>
 
 <header>🛠 لوحة إدارة الطلبات</header>
+
+<!-- 🔥 أزرار التحكم -->
+<div class="admin-actions">
+  <a href="index.html" class="action-btn store">🏪 الرجوع للمتجر</a>
+  <a href="add-service.html" class="action-btn add">➕ إضافة خدمة</a>
+</div>
 
 <div class="container" id="orders"></div>
 
