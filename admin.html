@@ -36,56 +36,75 @@ header{
   text-decoration:none;
   color:#fff;
   transition:.35s;
-  display:flex;
-  align-items:center;
-  gap:6px;
 }
 
 .action-btn.store{
   background:linear-gradient(135deg,#334155,#0f172a);
 }
 
-.action-btn.add{
-  background:linear-gradient(135deg,#2563eb,#1e40af);
+/* ===== إضافة خدمة ===== */
+.add-box{
+  max-width:900px;
+  margin:20px auto;
+  padding:20px;
+  border:1px solid #1e293b;
+  border-radius:22px;
+  background:#020617;
+  animation:fade .6s ease;
 }
 
-.action-btn:hover{
-  transform:scale(1.08);
-  box-shadow:0 12px 30px rgba(0,0,0,.4);
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px)}
 }
 
+.add-box h3{
+  margin-top:0;
+  margin-bottom:14px;
+}
+
+.add-box input,
+.add-box textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  font-family:inherit;
+}
+
+.add-box textarea{
+  resize:none;
+  height:80px;
+}
+
+.add-box button{
+  padding:12px 24px;
+  border:none;
+  border-radius:14px;
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* ===== الطلبات ===== */
 .container{
   max-width:1000px;
   margin:auto;
   padding:24px;
 }
 
-/* 🔥 كرت الطلب */
 .card{
-  background:linear-gradient(160deg,#020617,#020617);
+  background:#020617;
   border:1px solid #1e293b;
   border-radius:22px;
   padding:18px;
   margin-bottom:18px;
-  animation:cardIn .7s cubic-bezier(.25,.8,.25,1);
-  transition:.35s;
-}
-
-.card:hover{
-  transform:translateY(-6px) scale(1.01);
-  box-shadow:0 20px 50px rgba(0,0,0,.45);
-  border-color:#38bdf8;
+  animation:cardIn .7s ease;
 }
 
 @keyframes cardIn{
-  from{
-    opacity:0;
-    transform:translateY(40px) scale(.95);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
+  from{opacity:0;transform:translateY(30px)}
 }
 
 .top{
@@ -104,69 +123,21 @@ header{
 }
 
 .info{
-  font-size:15px;
   line-height:1.8;
   color:#e5e7eb;
 }
 
-/* 🖼 صورة الخدمة */
-.service-img{
-  margin-top:14px;
-  overflow:hidden;
-  border-radius:16px;
-}
-
-.service-img img{
-  width:100%;
-  max-height:220px;
-  object-fit:cover;
-}
-
-/* 🖼 صورة الإثبات */
-.proof{
-  margin-top:14px;
-  overflow:hidden;
-  border-radius:16px;
-}
-
 .proof img{
   width:100%;
-  max-height:260px;
+  max-height:240px;
   object-fit:cover;
-  cursor:pointer;
-  transition:.4s;
+  border-radius:14px;
+  margin-top:12px;
 }
 
-.proof img:hover{
-  transform:scale(1.08);
-}
-
-/* تكبير الصورة */
-.lightbox{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.8);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
-}
-
-.lightbox img{
-  max-width:90%;
-  max-height:90%;
-  border-radius:18px;
-  animation:zoom .4s ease;
-}
-
-@keyframes zoom{
-  from{transform:scale(.6);opacity:0}
-}
-
-/* لا يوجد طلبات */
 .empty{
   text-align:center;
-  margin-top:60px;
+  margin-top:40px;
   color:#94a3b8;
 }
 </style>
@@ -174,18 +145,26 @@ header{
 
 <body>
 
-<header>🛠 لوحة إدارة الطلبات</header>
+<header>🛠 لوحة الأدمن</header>
 
 <div class="admin-actions">
   <a href="index.html" class="action-btn store">🏪 الرجوع للمتجر</a>
-  <a href="add-service.html" class="action-btn add">➕ إضافة خدمة</a>
 </div>
 
+<!-- ✅ إضافة خدمة -->
+<div class="add-box">
+  <h3>➕ إضافة خدمة</h3>
+
+  <input id="sName" placeholder="اسم الخدمة">
+  <textarea id="sDetails" placeholder="تفاصيل الخدمة"></textarea>
+  <input id="sPrice" type="number" placeholder="سعر الخدمة">
+  <input id="sImage" placeholder="رابط صورة الخدمة">
+
+  <button onclick="addService()">حفظ الخدمة</button>
+</div>
+
+<!-- ✅ الطلبات -->
 <div class="container" id="orders"></div>
-
-<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
-  <img id="lightImg">
-</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -202,6 +181,31 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const box = document.getElementById("orders");
 
+/* ===== إضافة خدمة ===== */
+function addService(){
+  const name = sName.value.trim();
+  const details = sDetails.value.trim();
+  const price = sPrice.value;
+  const image = sImage.value.trim();
+
+  if(!name || !details || !price || !image){
+    alert("❌ جميع الحقول مطلوبة");
+    return;
+  }
+
+  db.collection("services").add({
+    name,
+    details,
+    price,
+    image,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("✅ تم إضافة الخدمة");
+    sName.value = sDetails.value = sPrice.value = sImage.value = "";
+  });
+}
+
+/* ===== الطلبات ===== */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="login.html";
@@ -212,7 +216,6 @@ auth.onAuthStateChanged(user=>{
     .orderBy("createdAt","desc")
     .onSnapshot(snap=>{
       box.innerHTML="";
-
       if(snap.empty){
         box.innerHTML=`<div class="empty">📭 لا يوجد طلبات</div>`;
         return;
@@ -228,35 +231,18 @@ auth.onAuthStateChanged(user=>{
               <b>📦 ${o.service}</b>
               <span class="badge">${o.status || "قيد المراجعة"}</span>
             </div>
-
             <div class="info">
-              👤 العميل: ${o.email.split("@")[0]}<br>
-              📧 البريد: ${o.email}<br>
-              📝 تفاصيل الخدمة: ${o.serviceDetails || "-"}<br>
+              👤 العميل: ${o.email}<br>
               💳 الدفع: ${o.paymentMethod}<br>
               💰 السعر: $${o.price}<br>
-              🕒 التاريخ: ${date}
+              🕒 ${date}
             </div>
-
-            ${o.serviceImage ? `
-              <div class="service-img">
-                <img src="${o.serviceImage}">
-              </div>` : ""}
-
-            ${o.proofImage ? `
-              <div class="proof">
-                <img src="${o.proofImage}" onclick="openImg('${o.proofImage}')">
-              </div>` : ""}
+            ${o.proofImage ? `<div class="proof"><img src="${o.proofImage}"></div>` : ""}
           </div>
         `;
       });
     });
 });
-
-function openImg(src){
-  document.getElementById("lightImg").src = src;
-  document.getElementById("lightbox").style.display="flex";
-}
 </script>
 
 </body>
