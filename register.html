@@ -32,10 +32,7 @@ body{
   to{opacity:1;transform:none}
 }
 
-h2{
-  text-align:center;
-  margin-bottom:25px;
-}
+h2{text-align:center;margin-bottom:25px}
 
 input{
   width:100%;
@@ -44,7 +41,6 @@ input{
   border-radius:14px;
   margin-bottom:12px;
   outline:none;
-  background:rgba(255,255,255,.9);
 }
 
 .check{
@@ -66,20 +62,12 @@ button{
   cursor:pointer;
   transition:.3s;
 }
+button:hover{transform:scale(1.05)}
 
-button:hover{
-  transform:scale(1.05);
-}
-
-.link{
-  text-align:center;
-  margin-top:15px;
-  font-size:13px;
-}
-
+.link{text-align:center;margin-top:15px;font-size:13px}
 .link a{color:#60a5fa;text-decoration:none}
 
-/* ===== MODAL ===== */
+/* Modal */
 .modal{
   position:fixed;
   inset:0;
@@ -91,14 +79,10 @@ button:hover{
   pointer-events:none;
   transition:.4s;
 }
-
-.modal.show{
-  opacity:1;
-  pointer-events:auto;
-}
+.modal.show{opacity:1;pointer-events:auto}
 
 .modal-box{
-  background:linear-gradient(135deg,#1e3a8a,#020617);
+  background:linear-gradient(135deg,#166534,#020617);
   padding:25px;
   border-radius:20px;
   width:90%;
@@ -107,14 +91,7 @@ button:hover{
   transform:scale(.7);
   transition:.4s;
 }
-
-.modal.show .modal-box{
-  transform:scale(1);
-}
-
-.modal-box button{
-  margin-top:15px;
-}
+.modal.show .modal-box{transform:scale(1)}
 </style>
 </head>
 
@@ -126,7 +103,7 @@ button:hover{
   <input id="username" placeholder="اسم المستخدم">
   <input id="email" type="email" placeholder="البريد الإلكتروني">
   <input id="password" type="password" placeholder="كلمة المرور">
-  <input id="confirm" type="password" placeholder="تأكيد كلمة المرور">
+  <input id="password2" type="password" placeholder="تأكيد كلمة المرور">
 
   <div class="check">
     <input type="checkbox" id="agree">
@@ -140,16 +117,14 @@ button:hover{
   </div>
 </div>
 
-<!-- Modal -->
 <div id="modal" class="modal">
-  <div class="modal-box" id="modalBox">
+  <div class="modal-box">
     <h3 id="mTitle"></h3>
     <p id="mText"></p>
-    <button onclick="closeModal()">حسناً</button>
+    <button onclick="modal.classList.remove('show')">حسناً</button>
   </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -161,65 +136,55 @@ firebase.initializeApp({
   projectId:"digital-store-268a9"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-const modal=document.getElementById("modal");
-const mTitle=document.getElementById("mTitle");
-const mText=document.getElementById("mText");
-const modalBox=document.getElementById("modalBox");
+const modal = document.getElementById("modal");
+const mTitle = document.getElementById("mTitle");
+const mText = document.getElementById("mText");
 
-function showModal(t,txt,type="info"){
+function showModal(t,txt,error=false){
   mTitle.textContent=t;
   mText.textContent=txt;
-  modalBox.style.background =
-    type==="error"
-    ?"linear-gradient(135deg,#7f1d1d,#020617)"
-    :"linear-gradient(135deg,#166534,#020617)";
+  modal.querySelector(".modal-box").style.background =
+    error ? "linear-gradient(135deg,#7f1d1d,#020617)"
+          : "linear-gradient(135deg,#166534,#020617)";
   modal.classList.add("show");
 }
 
-function closeModal(){
-  modal.classList.remove("show");
-}
-
 function register(){
-  const user=username.value.trim();
-  const email=email.value.trim();
-  const pass=password.value;
-  const conf=confirm.value;
+  const username = document.getElementById("username").value.trim();
+  const email    = document.getElementById("email").value.trim();
+  const pass     = document.getElementById("password").value;
+  const pass2    = document.getElementById("password2").value;
+  const agree    = document.getElementById("agree").checked;
 
-  if(!user||!email||!pass||!conf)
-    return showModal("خطأ ❌","جميع الحقول مطلوبة","error");
+  if(!username||!email||!pass||!pass2)
+    return showModal("خطأ ❌","جميع الحقول مطلوبة",true);
 
-  if(pass!==conf)
-    return showModal("خطأ ❌","كلمتا السر غير متطابقتين","error");
+  if(pass !== pass2)
+    return showModal("خطأ ❌","كلمتا المرور غير متطابقتين",true);
 
-  if(!agree.checked)
-    return showModal("تنبيه ⚠️","يجب الموافقة على الشروط","error");
+  if(!agree)
+    return showModal("تنبيه ⚠️","يجب الموافقة على الشروط",true);
 
   auth.createUserWithEmailAndPassword(email,pass)
-  .then(cred=>{
-    return db.collection("users").doc(cred.user.uid).set({
-      username:user,
-      email,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    .then(cred=>{
+      return db.collection("users").doc(cred.user.uid).set({
+        username,
+        email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(()=>{
+      showModal("تم ✅","تم إنشاء الحساب بنجاح");
+      setTimeout(()=>location.href="index.html",2000);
+    })
+    .catch(err=>{
+      showModal("خطأ ❌",err.message,true);
     });
-  })
-  .then(()=>{
-    showModal("تم ✅","تم إنشاء الحساب بنجاح");
-    setTimeout(()=>location.href="index.html",2000);
-  })
-  .catch(err=>{
-    if(err.code==="auth/email-already-in-use")
-      showModal("خطأ ❌","الإيميل مستخدم مسبقًا","error");
-    else if(err.code==="auth/network-request-failed")
-      showModal("خطأ ❌","مشكلة اتصال بالإنترنت","error");
-    else
-      showModal("خطأ ❌",err.message,"error");
-  });
 }
 </script>
 
 </body>
-  </html>
+</html>
