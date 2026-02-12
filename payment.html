@@ -16,7 +16,6 @@ body{
   align-items:center;
 }
 
-/* صندوق */
 .box{
   width:94%;
   max-width:460px;
@@ -40,7 +39,6 @@ h2{text-align:center;margin-bottom:16px}
   margin-bottom:16px;
 }
 
-/* طرق الدفع */
 .pay{
   border:1px solid #1e293b;
   border-radius:14px;
@@ -50,9 +48,7 @@ h2{text-align:center;margin-bottom:16px}
   transition:.3s;
 }
 
-.pay:hover{
-  transform:scale(1.02);
-}
+.pay:hover{ transform:scale(1.02); }
 
 .pay.active{
   border-color:#4ade80;
@@ -60,7 +56,6 @@ h2{text-align:center;margin-bottom:16px}
   box-shadow:0 0 12px #4ade80aa;
 }
 
-/* التفاصيل */
 .details{
   margin-top:10px;
   padding:10px;
@@ -76,12 +71,10 @@ h2{text-align:center;margin-bottom:16px}
   from{opacity:0;transform:scale(.9)}
 }
 
-/* رفع الصورة */
 .upload{
   margin-top:14px;
 }
 
-/* زر */
 button{
   width:100%;
   margin-top:18px;
@@ -93,17 +86,23 @@ button{
   font-size:16px;
   cursor:pointer;
   transition:.2s;
+  position:relative;
 }
 
-button:hover{
-  transform:scale(1.03);
+button:hover{ transform:scale(1.03); }
+button:active{ transform:scale(.96); }
+
+.progress-bar{
+  position:absolute;
+  bottom:0;
+  left:0;
+  height:4px;
+  background:#4ade80;
+  width:0%;
+  border-radius:0 0 16px 16px;
+  transition:width 0.2s ease;
 }
 
-button:active{
-  transform:scale(.96);
-}
-
-/* رجوع */
 .back{
   margin-top:12px;
   text-align:center;
@@ -123,7 +122,6 @@ button:active{
     💰 السعر: <b>$<span id="servicePrice"></span></b>
   </div>
 
-  <!-- طرق الدفع -->
   <div class="pay" onclick="selectPay(this,'بنك فلسطين')">
     🏦 بنك فلسطين
     <div class="details">
@@ -155,20 +153,20 @@ button:active{
     </div>
   </div>
 
-  <!-- رفع صورة -->
   <div class="upload">
     📷 رفع صورة إثبات الدفع
     <input type="file" id="proof" accept="image/*">
   </div>
 
-  <button onclick="confirmOrder()">تأكيد الطلب</button>
+  <button onclick="confirmOrder(this)">تأكيد الطلب
+    <div class="progress-bar" id="progressBar"></div>
+  </button>
 
   <div class="back" onclick="location.href='index.html'">
     ⬅ الرجوع للمتجر
   </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -188,28 +186,26 @@ const storage = firebase.storage();
 
 let paymentMethod = "";
 
-/* عرض بيانات الخدمة */
 serviceName.textContent = localStorage.getItem("serviceName") || "-";
 servicePrice.textContent = localStorage.getItem("servicePrice") || "0";
 
-/* اختيار الدفع */
 function selectPay(el,method){
   document.querySelectorAll(".pay").forEach(p=>{
     p.classList.remove("active");
     p.querySelector(".details").style.display="none";
   });
-
   el.classList.add("active");
   el.querySelector(".details").style.display="block";
   paymentMethod = method;
 }
 
-/* ✅ إصلاح زر تأكيد الطلب */
-async function confirmOrder(){
+/* ✅ زر تأكيد الطلب مع شريط تحميل */
+async function confirmOrder(btn){
 
-  const btn = event.target;
   btn.disabled = true;
+  const progressBar = document.getElementById("progressBar");
   btn.innerText = "جاري الإرسال...";
+  btn.appendChild(progressBar);
 
   const user = auth.currentUser;
 
@@ -237,10 +233,15 @@ async function confirmOrder(){
   }
 
   try{
-
     const ref = storage.ref("proofs/"+Date.now()+"_"+file.name);
+    const uploadTask = ref.put(file);
 
-    await ref.put(file);
+    uploadTask.on('state_changed', snapshot=>{
+      const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      progressBar.style.width = percent + "%";
+    });
+
+    await uploadTask;
 
     const imageURL = await ref.getDownloadURL();
 
@@ -262,6 +263,7 @@ async function confirmOrder(){
     alert("❌ حدث خطأ أثناء الإرسال");
     btn.disabled = false;
     btn.innerText = "تأكيد الطلب";
+    progressBar.style.width = "0%";
   }
 }
 </script>
