@@ -207,15 +207,23 @@ function selectPay(el,method){
 /* ✅ إصلاح زر تأكيد الطلب */
 async function confirmOrder(){
 
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerText = "جاري الإرسال...";
+
   const user = auth.currentUser;
 
   if(!user){
     alert("سجل دخولك أولاً");
+    btn.disabled = false;
+    btn.innerText = "تأكيد الطلب";
     return;
   }
 
   if(!paymentMethod){
     alert("اختر طريقة الدفع");
+    btn.disabled = false;
+    btn.innerText = "تأكيد الطلب";
     return;
   }
 
@@ -223,6 +231,8 @@ async function confirmOrder(){
 
   if(!file){
     alert("ارفع صورة الإثبات");
+    btn.disabled = false;
+    btn.innerText = "تأكيد الطلب";
     return;
   }
 
@@ -245,12 +255,13 @@ async function confirmOrder(){
     });
 
     alert("✅ تم إرسال الطلب بنجاح");
-
     location.href="orders.html";
 
   }catch(e){
     console.error(e);
     alert("❌ حدث خطأ أثناء الإرسال");
+    btn.disabled = false;
+    btn.innerText = "تأكيد الطلب";
   }
 }
 </script>
