@@ -14,13 +14,12 @@ body{
 
 header{
   padding:18px 24px;
-  background:#020617;
   border-bottom:1px solid #1e293b;
   text-align:center;
   font-size:20px;
 }
 
-/* ===== أزرار الأدمن ===== */
+/* ===== أزرار ===== */
 .admin-actions{
   display:flex;
   justify-content:center;
@@ -32,14 +31,9 @@ header{
 .action-btn{
   padding:12px 22px;
   border-radius:999px;
-  font-size:14px;
   text-decoration:none;
   color:#fff;
-  transition:.35s;
-}
-
-.action-btn.store{
-  background:linear-gradient(135deg,#334155,#0f172a);
+  background:#334155;
 }
 
 /* ===== إضافة خدمة ===== */
@@ -49,17 +43,6 @@ header{
   padding:20px;
   border:1px solid #1e293b;
   border-radius:22px;
-  background:#020617;
-  animation:fade .6s ease;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(20px)}
-}
-
-.add-box h3{
-  margin-top:0;
-  margin-bottom:14px;
 }
 
 .add-box input,
@@ -69,25 +52,17 @@ header{
   margin-bottom:10px;
   border-radius:14px;
   border:none;
-  outline:none;
-  font-family:inherit;
-}
-
-.add-box textarea{
-  resize:none;
-  height:80px;
 }
 
 .add-box button{
-  padding:12px 24px;
+  padding:12px 20px;
   border:none;
   border-radius:14px;
   background:#2563eb;
   color:#fff;
-  cursor:pointer;
 }
 
-/* ===== الطلبات ===== */
+/* ===== كروت ===== */
 .container{
   max-width:1000px;
   margin:auto;
@@ -95,50 +70,59 @@ header{
 }
 
 .card{
-  background:#020617;
+  background:#0f172a;
   border:1px solid #1e293b;
-  border-radius:22px;
-  padding:18px;
-  margin-bottom:18px;
-  animation:cardIn .7s ease;
-}
-
-@keyframes cardIn{
-  from{opacity:0;transform:translateY(30px)}
-}
-
-.top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:14px;
 }
 
 .badge{
-  background:#022c22;
-  color:#4ade80;
-  padding:6px 12px;
+  padding:5px 10px;
   border-radius:999px;
-  font-size:13px;
+  font-size:12px;
+  background:#334155;
 }
 
-.info{
-  line-height:1.8;
-  color:#e5e7eb;
+.btn{
+  padding:6px 10px;
+  border:none;
+  border-radius:10px;
+  margin-top:8px;
+  cursor:pointer;
+  font-size:12px;
 }
+
+.green{background:#16a34a;color:#fff}
+.red{background:#dc2626;color:#fff}
+.gray{background:#475569;color:#fff}
 
 .proof img{
   width:100%;
-  max-height:240px;
-  object-fit:cover;
-  border-radius:14px;
-  margin-top:12px;
+  max-height:220px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:10px;
 }
 
-.empty{
-  text-align:center;
-  margin-top:40px;
-  color:#94a3b8;
+/* تكبير الصورة */
+.lightbox{
+  position:fixed;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.9);
+}
+
+.lightbox img{
+  max-width:90%;
+  max-height:90%;
+}
+
+.section-title{
+  margin:30px 0 10px;
+  font-size:18px;
 }
 </style>
 </head>
@@ -148,10 +132,10 @@ header{
 <header>🛠 لوحة الأدمن</header>
 
 <div class="admin-actions">
-  <a href="index.html" class="action-btn store">🏪 الرجوع للمتجر</a>
+  <a href="index.html" class="action-btn">🏪 الرجوع للمتجر</a>
 </div>
 
-<!-- ✅ إضافة خدمة -->
+<!-- إضافة خدمة -->
 <div class="add-box">
   <h3>➕ إضافة خدمة</h3>
 
@@ -163,8 +147,21 @@ header{
   <button onclick="addService()">حفظ الخدمة</button>
 </div>
 
-<!-- ✅ الطلبات -->
-<div class="container" id="orders"></div>
+<!-- عرض الخدمات -->
+<div class="container">
+  <div class="section-title">🧩 الخدمات</div>
+  <div id="servicesBox"></div>
+</div>
+
+<!-- الطلبات -->
+<div class="container">
+  <div class="section-title">📦 الطلبات</div>
+  <div id="orders"></div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
+  <img id="lightImg">
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -179,71 +176,109 @@ firebase.initializeApp({
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const box = document.getElementById("orders");
 
-/* ===== إضافة خدمة ===== */
+const ordersBox = document.getElementById("orders");
+const servicesBox = document.getElementById("servicesBox");
+
+
+// =========================
+// إضافة خدمة
+// =========================
 function addService(){
-  const name = sName.value.trim();
-  const details = sDetails.value.trim();
-  const price = sPrice.value;
-  const image = sImage.value.trim();
-
-  if(!name || !details || !price || !image){
-    alert("❌ جميع الحقول مطلوبة");
-    return;
-  }
-
   db.collection("services").add({
-    name,
-    details,
-    price,
-    image,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    alert("✅ تم إضافة الخدمة");
-    sName.value = sDetails.value = sPrice.value = sImage.value = "";
+    name:sName.value,
+    details:sDetails.value,
+    price:sPrice.value,
+    image:sImage.value,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
+
+  sName.value=sDetails.value=sPrice.value=sImage.value="";
 }
 
-/* ===== الطلبات ===== */
+
+// =========================
+// عرض الخدمات + حذف + تعديل
+// =========================
+db.collection("services").onSnapshot(snap=>{
+  servicesBox.innerHTML="";
+
+  snap.forEach(doc=>{
+    const s = doc.data();
+
+    servicesBox.innerHTML+=`
+      <div class="card">
+        <b>${s.name}</b><br>
+        ${s.details}<br>
+        💰 $${s.price}<br>
+        <img src="${s.image}" width="120"><br>
+
+        <button class="btn gray" onclick="editService('${doc.id}','${s.name}','${s.details}','${s.price}','${s.image}')">✏️ تعديل</button>
+        <button class="btn red" onclick="deleteService('${doc.id}')">🗑 حذف</button>
+      </div>
+    `;
+  });
+});
+
+function deleteService(id){
+  if(confirm("حذف الخدمة؟"))
+    db.collection("services").doc(id).delete();
+}
+
+function editService(id,n,d,p,i){
+  sName.value=n;
+  sDetails.value=d;
+  sPrice.value=p;
+  sImage.value=i;
+
+  deleteService(id);
+}
+
+
+// =========================
+// الطلبات + قبول/رفض
+// =========================
 auth.onAuthStateChanged(user=>{
-  if(!user){
-    location.href="login.html";
-    return;
-  }
+  if(!user) location.href="login.html";
 
   db.collection("orders")
-    .orderBy("createdAt","desc")
-    .onSnapshot(snap=>{
-      box.innerHTML="";
-      if(snap.empty){
-        box.innerHTML=`<div class="empty">📭 لا يوجد طلبات</div>`;
-        return;
-      }
+  .orderBy("createdAt","desc")
+  .onSnapshot(snap=>{
+    ordersBox.innerHTML="";
 
-      snap.forEach(doc=>{
-        const o = doc.data();
-        const date = o.createdAt?.toDate().toLocaleString("ar-EG") || "-";
+    snap.forEach(doc=>{
+      const o = doc.data();
 
-        box.innerHTML += `
-          <div class="card">
-            <div class="top">
-              <b>📦 ${o.service}</b>
-              <span class="badge">${o.status || "قيد المراجعة"}</span>
-            </div>
-            <div class="info">
-              👤 العميل: ${o.email}<br>
-              💳 الدفع: ${o.paymentMethod}<br>
-              💰 السعر: $${o.price}<br>
-              🕒 ${date}
-            </div>
-            ${o.proofImage ? `<div class="proof"><img src="${o.proofImage}"></div>` : ""}
-          </div>
-        `;
-      });
+      ordersBox.innerHTML+=`
+        <div class="card">
+          <b>${o.service}</b>
+          <span class="badge">${o.status || "قيد المراجعة"}</span><br>
+          👤 ${o.email}<br>
+          💰 $${o.price}
+
+          ${o.proofImage ? `<div class="proof"><img src="${o.proofImage}" onclick="openImg('${o.proofImage}')"></div>` : ""}
+
+          <button class="btn green" onclick="updateStatus('${doc.id}','مقبول')">✅ قبول</button>
+          <button class="btn red" onclick="updateStatus('${doc.id}','مرفوض')">❌ رفض</button>
+        </div>
+      `;
     });
+  });
 });
+
+function updateStatus(id,status){
+  db.collection("orders").doc(id).update({status});
+}
+
+
+// =========================
+// تكبير صورة
+// =========================
+function openImg(src){
+  lightbox.style.display="flex";
+  lightImg.src=src;
+}
 </script>
 
 </body>
-  </html>
+</html>
