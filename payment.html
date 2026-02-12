@@ -169,13 +169,13 @@ button:active{ transform:scale(.96); }
     </div>
   </div>
 
-  <!-- رفع صورة إثبات الدفع -->
+  <!-- رفع إثبات الدفع -->
   <div class="upload">
     📷 رفع صورة إثبات الدفع
     <input type="file" id="proof" accept="image/*">
   </div>
 
-  <button id="confirmBtn">تأكيد الطلب</button>
+  <button id="confirmBtn" onclick="confirmOrder()">تأكيد الطلب</button>
 
   <div class="back" onclick="location.href='index.html'">
     ⬅ الرجوع للمتجر
@@ -192,19 +192,16 @@ button:active{ transform:scale(.96); }
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyAkVr83u7Oxy-lWvqWlCqyVjIS34J-FRd4",
   authDomain:"digital-store-268a9.firebaseapp.com",
-  projectId:"digital-store-268a9",
-  storageBucket:"digital-store-268a9.appspot.com"
+  projectId:"digital-store-268a9"
 });
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 let paymentMethod = "";
 
@@ -213,34 +210,34 @@ serviceName.textContent = localStorage.getItem("serviceName") || "-";
 servicePrice.textContent = localStorage.getItem("servicePrice") || "0";
 
 /* اختيار طريقة الدفع */
-function selectPay(el,method){
-  document.querySelectorAll(".pay").forEach(p=>{
+function selectPay(el, method) {
+  document.querySelectorAll(".pay").forEach(p => {
     p.classList.remove("active");
-    p.querySelector(".details").style.display="none";
+    p.querySelector(".details").style.display = "none";
   });
 
   el.classList.add("active");
-  el.querySelector(".details").style.display="block";
+  el.querySelector(".details").style.display = "block";
   paymentMethod = method;
 }
 
-/* ✅ زر تأكيد الطلب */
-document.getElementById("confirmBtn").addEventListener("click", async function(){
-  const btn = this;
+/* تأكيد الطلب باستخدام Imgur */
+async function confirmOrder() {
+  const btn = document.getElementById("confirmBtn");
   const loader = document.getElementById("loader");
 
   btn.disabled = true;
   loader.style.display = "flex";
 
   const user = auth.currentUser;
-  if(!user){
+  if (!user) {
     alert("سجل دخولك أولاً");
     loader.style.display = "none";
     btn.disabled = false;
     return;
   }
 
-  if(!paymentMethod){
+  if (!paymentMethod) {
     alert("اختر طريقة الدفع");
     loader.style.display = "none";
     btn.disabled = false;
@@ -248,38 +245,54 @@ document.getElementById("confirmBtn").addEventListener("click", async function()
   }
 
   const file = document.getElementById("proof").files[0];
-  if(!file){
+  if (!file) {
     alert("ارفع صورة الإثبات");
     loader.style.display = "none";
     btn.disabled = false;
     return;
   }
 
-  try{
-    const ref = storage.ref("proofs/"+Date.now()+"_"+file.name);
-    await ref.put(file);
-    const imageURL = await ref.getDownloadURL();
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
 
+    // ضع هنا Client-ID الخاص بك من Imgur
+    const IMGUR_CLIENT_ID = "YOUR_IMGUR_CLIENT_ID";
+
+    const response = await fetch("https://api.imgur.com/3/image", {
+      method: "POST",
+      headers: {
+        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+    if (!data.success) throw new Error("فشل رفع الصورة");
+
+    const imageURL = data.data.link;
+
+    // حفظ الطلب في Firestore
     await db.collection("orders").add({
       service: localStorage.getItem("serviceName"),
       price: localStorage.getItem("servicePrice"),
       paymentMethod,
       proofImage: imageURL,
       email: user.email,
-      status:"بانتظار المراجعة",
+      status: "بانتظار المراجعة",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     alert("✅ تم إرسال الطلب بنجاح");
-    location.href="orders.html";
+    location.href = "orders.html";
 
-  }catch(e){
+  } catch (e) {
     console.error(e);
     alert("❌ حدث خطأ أثناء الإرسال");
     btn.disabled = false;
     loader.style.display = "none";
   }
-});
+}
 </script>
 
 </body>
