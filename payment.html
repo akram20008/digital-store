@@ -4,36 +4,22 @@
 <meta charset="UTF-8">
 <title>تفاصيل الدفع</title>
 <style>
-body{
-  margin:0;
-  font-family:Tajawal,Tahoma;
-  background:#020617;
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.box{
-  width:94%;
-  max-width:460px;
-  background:#020617;
-  border:1px solid #1e293b;
-  border-radius:22px;
-  padding:22px;
-}
+body{margin:0;font-family:Tajawal,Tahoma;background:#020617;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;}
+.box{width:94%;max-width:460px;background:#020617;border:1px solid #1e293b;border-radius:22px;padding:22px;animation:fade .6s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(30px)}}
 h2{text-align:center;margin-bottom:16px}
-.info{border:1px solid #1e293b;border-radius:14px;padding:14px;margin-bottom:16px}
-.pay{border:1px solid #1e293b;border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.3s}
-.pay:hover{transform:scale(1.02)}
-.pay.active{border-color:#4ade80;background:#022c22;box-shadow:0 0 12px #4ade80aa}
-.details{margin-top:10px;padding:10px;border-radius:10px;background:#020617;border:1px dashed #334155;font-size:14px;display:none}
-.upload{margin-top:14px}
-button{width:100%;margin-top:18px;padding:14px;border:none;border-radius:16px;background:#2563eb;color:#fff;font-size:16px;cursor:pointer}
-button:disabled{opacity:0.6;cursor:not-allowed}
-.back{margin-top:12px;text-align:center;color:#93c5fd;cursor:pointer}
-.loader-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;flex-direction:column;color:#fff;font-size:18px;z-index:9999}
-.loader{border:6px solid #334155;border-top:6px solid #2563eb;border-radius:50%;width:60px;height:60px;margin-bottom:12px;animation:spin 1s linear infinite}
+.info{border:1px solid #1e293b;border-radius:14px;padding:14px;margin-bottom:16px;}
+.pay{border:1px solid #1e293b;border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.3s;}
+.pay:hover{ transform:scale(1.02);}
+.pay.active{border-color:#4ade80;background:#022c22;box-shadow:0 0 12px #4ade80aa;}
+.details{margin-top:10px;padding:10px;border-radius:10px;background:#020617;border:1px dashed #334155;font-size:14px;display:none;}
+.upload{margin-top:14px;}
+button{width:100%;margin-top:18px;padding:14px;border:none;border-radius:16px;background:#2563eb;color:#fff;font-size:16px;cursor:pointer;transition:.2s;}
+button:hover{transform:scale(1.03);}
+button:active{transform:scale(.96);}
+.back{margin-top:12px;text-align:center;color:#93c5fd;cursor:pointer;}
+.loader-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:9999;flex-direction:column;color:#fff;font-size:18px;}
+.loader{border:6px solid #334155;border-top:6px solid #2563eb;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;margin-bottom:12px;}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 </style>
 </head>
@@ -41,12 +27,12 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 
 <div class="box">
   <h2>💳 تفاصيل الدفع</h2>
-
   <div class="info">
     📦 الخدمة: <b id="serviceName"></b><br>
     💰 السعر: <b>$<span id="servicePrice"></span></b>
   </div>
 
+  <!-- طرق الدفع -->
   <div class="pay" onclick="selectPay(this,'بنك فلسطين')">🏦 بنك فلسطين
     <div class="details">اسم الحساب: محمد أحمد<br>رقم الحساب: 123456789</div>
   </div>
@@ -60,16 +46,18 @@ button:disabled{opacity:0.6;cursor:not-allowed}
     <div class="details">الاسم: محمد أحمد<br>الرقم: 0560000000</div>
   </div>
 
+  <!-- رفع الصورة -->
   <div class="upload">📷 رفع صورة إثبات الدفع
     <input type="file" id="proof" accept="image/*">
   </div>
 
-  <button id="confirmBtn" onclick="confirmOrder()">تأكيد الطلب</button>
+  <button id="confirmBtn">تأكيد الطلب</button>
   <div class="back" onclick="location.href='index.html'">⬅ الرجوع للمتجر</div>
 </div>
 
 <div class="loader-overlay" id="loader">
-  <div class="loader"></div>جاري الإرسال...
+  <div class="loader"></div>
+  جاري الإرسال...
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -90,13 +78,9 @@ const db = firebase.firestore();
 const storage = firebase.storage();
 
 let paymentMethod = "";
-const serviceNameElem = document.getElementById("serviceName");
-const servicePriceElem = document.getElementById("servicePrice");
-const loader = document.getElementById("loader");
-const confirmBtn = document.getElementById("confirmBtn");
 
-serviceNameElem.textContent = localStorage.getItem("serviceName") || "-";
-servicePriceElem.textContent = localStorage.getItem("servicePrice") || "0";
+document.getElementById("serviceName").textContent = localStorage.getItem("serviceName") || "-";
+document.getElementById("servicePrice").textContent = localStorage.getItem("servicePrice") || "0";
 
 function selectPay(el, method){
   document.querySelectorAll(".pay").forEach(p=>{
@@ -108,36 +92,30 @@ function selectPay(el, method){
   paymentMethod = method;
 }
 
-async function confirmOrder(){
-  confirmBtn.disabled = true;
+document.getElementById("confirmBtn").addEventListener("click", async ()=>{
+  const btn = document.getElementById("confirmBtn");
+  const loader = document.getElementById("loader");
+  btn.disabled = true;
   loader.style.display = "flex";
 
-  let user = auth.currentUser;
-
+  const user = auth.currentUser;
   if(!user){
-    // إذا المستخدم غير جاهز بعد الانتظار قليل
-    await new Promise(resolve => setTimeout(resolve, 500));
-    user = auth.currentUser;
-    if(!user){
-      alert("سجل دخولك أولاً");
-      loader.style.display = "none";
-      confirmBtn.disabled = false;
-      return;
-    }
-  }
-
-  if(!paymentMethod){
-    alert("اختر طريقة الدفع");
+    alert("سجل دخولك أولاً");
+    btn.disabled = false;
     loader.style.display = "none";
-    confirmBtn.disabled = false;
     return;
   }
-
+  if(!paymentMethod){
+    alert("اختر طريقة الدفع");
+    btn.disabled = false;
+    loader.style.display = "none";
+    return;
+  }
   const file = document.getElementById("proof").files[0];
   if(!file){
     alert("ارفع صورة الإثبات");
+    btn.disabled = false;
     loader.style.display = "none";
-    confirmBtn.disabled = false;
     return;
   }
 
@@ -161,11 +139,10 @@ async function confirmOrder(){
   }catch(e){
     console.error(e);
     alert("❌ حدث خطأ أثناء الإرسال");
+    btn.disabled = false;
     loader.style.display = "none";
-    confirmBtn.disabled = false;
   }
-}
+});
 </script>
-
 </body>
 </html>
