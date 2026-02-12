@@ -169,7 +169,7 @@ button:active{ transform:scale(.96); }
     </div>
   </div>
 
-  <!-- رفع إثبات الدفع -->
+  <!-- رفع صورة إثبات الدفع -->
   <div class="upload">
     📷 رفع صورة إثبات الدفع
     <input type="file" id="proof" accept="image/*">
@@ -182,6 +182,7 @@ button:active{ transform:scale(.96); }
   </div>
 </div>
 
+<!-- نافذة جاري الإرسال -->
 <div class="loader-overlay" id="loader">
   <div class="loader"></div>
   جاري الإرسال...
@@ -208,8 +209,8 @@ const storage = firebase.storage();
 let paymentMethod = "";
 
 /* عرض بيانات الخدمة */
-document.getElementById("serviceName").textContent = localStorage.getItem("serviceName") || "-";
-document.getElementById("servicePrice").textContent = localStorage.getItem("servicePrice") || "0";
+serviceName.textContent = localStorage.getItem("serviceName") || "-";
+servicePrice.textContent = localStorage.getItem("servicePrice") || "0";
 
 /* اختيار طريقة الدفع */
 function selectPay(el,method){
@@ -223,7 +224,7 @@ function selectPay(el,method){
   paymentMethod = method;
 }
 
-/* زر تأكيد الطلب */
+/* ✅ زر تأكيد الطلب */
 document.getElementById("confirmBtn").addEventListener("click", async function(){
   const btn = this;
   const loader = document.getElementById("loader");
@@ -231,21 +232,34 @@ document.getElementById("confirmBtn").addEventListener("click", async function()
   btn.disabled = true;
   loader.style.display = "flex";
 
+  const user = auth.currentUser;
+  if(!user){
+    alert("سجل دخولك أولاً");
+    loader.style.display = "none";
+    btn.disabled = false;
+    return;
+  }
+
+  if(!paymentMethod){
+    alert("اختر طريقة الدفع");
+    loader.style.display = "none";
+    btn.disabled = false;
+    return;
+  }
+
+  const file = document.getElementById("proof").files[0];
+  if(!file){
+    alert("ارفع صورة الإثبات");
+    loader.style.display = "none";
+    btn.disabled = false;
+    return;
+  }
+
   try{
-    const user = auth.currentUser;
-    if(!user) throw new Error("سجل دخولك أولاً");
-
-    if(!paymentMethod) throw new Error("اختر طريقة الدفع");
-
-    const file = document.getElementById("proof").files[0];
-    if(!file) throw new Error("ارفع صورة الإثبات");
-
-    // رفع الصورة
     const ref = storage.ref("proofs/"+Date.now()+"_"+file.name);
     await ref.put(file);
     const imageURL = await ref.getDownloadURL();
 
-    // إضافة الطلب
     await db.collection("orders").add({
       service: localStorage.getItem("serviceName"),
       price: localStorage.getItem("servicePrice"),
@@ -260,8 +274,8 @@ document.getElementById("confirmBtn").addEventListener("click", async function()
     location.href="orders.html";
 
   }catch(e){
-    alert("❌ " + e.message);
     console.error(e);
+    alert("❌ حدث خطأ أثناء الإرسال");
     btn.disabled = false;
     loader.style.display = "none";
   }
